@@ -1,25 +1,23 @@
-// EventBus - simple event emitter for module communication
-const EventBus = {
-  events: {},
-  on(event, callback) {
-    (this.events[event] = this.events[event] || []).push(callback);
-  },
-  emit(event, data) {
-    (this.events[event] || []).forEach(cb => cb(data));
-  }
-};
+import { EventBus } from './main.js';
+import { initDB } from './storage.js';
+import { initUpload } from './upload.js';
+import { initCanvasWorkspace } from './canvas-workspace.js';
+import { initReferenceLibrary } from './reference-library.js';
+import { initPreview } from './preview.js';
+import { initDownload } from './download.js';
 
 window.EventBus = EventBus;
 
-// All modules will be imported and initialized here
-import './storage.js';
-import './upload.js';
-import './canvas-workspace.js';
-import './reference-library.js';
-import './preview.js';
-import './download.js';
-
 window.addEventListener('DOMContentLoaded', async () => {
-  // Modules self-initialize via their init functions
-  console.log('[Color Muse] initialized');
+  try {
+    await initDB();
+    initUpload();
+    initCanvasWorkspace();
+    await initReferenceLibrary();
+    initPreview();
+    initDownload();
+    console.log('[Color Muse] initialized');
+  } catch (err) {
+    console.error('[Color Muse] Initialization failed:', err);
+  }
 });

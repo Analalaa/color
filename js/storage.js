@@ -18,11 +18,23 @@ export async function initDB() {
 
 export async function saveReferenceImage(imageData) {
   if (!db) throw new Error('Database not initialized. Call initDB() first.');
-  const tx = db.transaction('reference_images', 'readwrite');
-  tx.objectStore('reference_images').add(imageData);
   return new Promise((resolve, reject) => {
-    tx.oncomplete = resolve;
+    const tx = db.transaction('reference_images', 'readwrite');
+    const store = tx.objectStore('reference_images');
+    const request = store.add(imageData);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
     tx.onerror = () => reject(tx.error);
+  });
+}
+
+export async function getReferenceImageById(id) {
+  if (!db) throw new Error('Database not initialized. Call initDB() first.');
+  const tx = db.transaction('reference_images', 'readonly');
+  return new Promise((resolve, reject) => {
+    const request = tx.objectStore('reference_images').get(id);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
   });
 }
 
