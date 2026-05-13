@@ -1,5 +1,12 @@
-// EventBus implementation
-class EventBus {
+import { initDB } from './storage.js';
+import { initUpload } from './upload.js';
+import { initCanvasWorkspace } from './canvas-workspace.js';
+import { initReferenceLibrary } from './reference-library.js';
+import { initPreview } from './preview.js';
+import { initDownload } from './download.js';
+import { showToast } from './toast.js';
+
+class EventBusImpl {
   constructor() {
     this.listeners = {};
   }
@@ -13,31 +20,34 @@ class EventBus {
   }
   emit(event, data) {
     if (!this.listeners[event]) return;
-    this.listeners[event].forEach(cb => cb(data));
+    this.listeners[event].forEach(cb => {
+      try { cb(data); } catch (err) { console.error(`[EventBus] handler for "${event}" threw:`, err); }
+    });
   }
 }
 
-const eventBus = new EventBus();
-window.EventBus = eventBus;
+export const EventBus = new EventBusImpl();
+window.EventBus = EventBus;
+window.showToast = showToast;
 
-// Initialize toolbar controls
 function initToolbar() {
-  // Algorithm switch handler
   document.querySelectorAll('input[name="algo"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
       EventBus.emit('algo-changed', e.target.value);
     });
   });
 
-  // Intensity slider handler
   const intensitySlider = document.getElementById('intensity-slider');
+  const intensityValueEl = document.getElementById('intensity-value');
   if (intensitySlider) {
+    let inputTimer = null;
     intensitySlider.addEventListener('input', (e) => {
       const val = parseInt(e.target.value);
-      // Update displayed value
-      const valEl = document.getElementById('intensity-value');
-      if (valEl) valEl.textContent = val + '%';
-      EventBus.emit('intensity-changed', val / 100);
+      if (intensityValueEl) intensityValueEl.textContent = val + '%';
+      if (inputTimer) clearTimeout(inputTimer);
+      inputTimer = setTimeout(() => {
+        EventBus.emit('intensity-changed', val / 100);
+      }, 120);
     });
   }
 }
@@ -52,7 +62,25 @@ window.addEventListener('DOMContentLoaded', async () => {
     initDownload();
     initToolbar();
     console.log('[Color Muse] initialized');
+
+    // LUT download button
+    const btnLutDownload = document.getElementById('btn-lut-download');
+    if (btnLutDownload) {
+      btnLutDownload.addEventListener('click', () => {
+        import('./preview.js').then(mod => mod.downloadCurrentLut());
+      });
+    }
+
+    // Enable LUT download button when transfer completes and algo is LUT
+    EventBus.on('transfer-complete', () => {
+      const currentAlgo = document.querySelector('input[name="algo"]:checked');
+      const btnLut = document.getElementById('btn-lut-download');
+      if (btnLut && currentAlgo && currentAlgo.value === 'lut') {
+        btnLut.disabled = false;
+      }
+    });
   } catch (err) {
     console.error('[Color Muse] Initialization failed:', err);
+    showToast('初始化失败: ' + err.message);
   }
 });

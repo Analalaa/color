@@ -2,6 +2,7 @@ import { EventBus } from './main.js';
 import { transferColor } from './color-transfer/histogram-transfer.js';
 import { generateLut } from './color-transfer/lut-generator.js';
 import { applyLut } from './color-transfer/lut-applier.js';
+import { downloadLutAsCube } from './color-transfer/cube-writer.js';
 
 let currentResultPixels = null;
 let currentResultDimensions = { width: 0, height: 0 };
@@ -157,4 +158,17 @@ export function getLastReferencePixels() {
 
 export function getLastIntensity() {
   return lastIntensity;
+}
+
+export function downloadCurrentLut() {
+  if (!currentLut) {
+    if (window.showToast) window.showToast('请先生成 LUT 结果');
+    return;
+  }
+  const refName = lastRefId || 'custom';
+  downloadLutAsCube(currentLut, 33, 'color-muse-' + refName + '.cube');
+}
+
+export function getCurrentLut() {
+  return currentLut;
 }
