@@ -17,6 +17,7 @@ export async function initDB() {
 }
 
 export async function saveReferenceImage(imageData) {
+  if (!db) throw new Error('Database not initialized. Call initDB() first.');
   const tx = db.transaction('reference_images', 'readwrite');
   tx.objectStore('reference_images').add(imageData);
   return new Promise((resolve, reject) => {
@@ -26,6 +27,7 @@ export async function saveReferenceImage(imageData) {
 }
 
 export async function getAllReferenceImages() {
+  if (!db) throw new Error('Database not initialized. Call initDB() first.');
   const tx = db.transaction('reference_images', 'readonly');
   return new Promise((resolve, reject) => {
     const request = tx.objectStore('reference_images').getAll();
@@ -35,6 +37,7 @@ export async function getAllReferenceImages() {
 }
 
 export async function deleteReferenceImage(id) {
+  if (!db) throw new Error('Database not initialized. Call initDB() first.');
   const tx = db.transaction('reference_images', 'readwrite');
   tx.objectStore('reference_images').delete(id);
   return new Promise((resolve, reject) => {

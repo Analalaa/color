@@ -52,8 +52,8 @@ export function transferColor(srcPixels, refPixels, intensity = 1.0) {
   for (let i = 0; i < len; i += 4) {
     const [L1, a1, b1] = rgbToLab(srcPixels[i], srcPixels[i+1], srcPixels[i+2]);
     const [L2, a2, b2] = rgbToLab(refPixels[i], refPixels[i+1], refPixels[i+2]);
-    srcL.push(L1); srcA.push(a1 + 128); srcB.push(b1 + 128); // shift to 0-255 range
-    refL.push(L2); refA.push(a2 + 128); refB.push(b2 + 128);
+    srcL.push(L1 * 2.55); srcA.push(a1 + 128); srcB.push(b1 + 128); // shift to 0-255 range
+    refL.push(L2 * 2.55); refA.push(a2 + 128); refB.push(b2 + 128);
   }
 
   // Build CDF match maps for each channel
