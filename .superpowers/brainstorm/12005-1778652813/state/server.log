@@ -1,0 +1,4 @@
+{"type":"server-started","port":60473,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:60473","screen_dir":"/Users/Admin/Documents/color/.superpowers/brainstorm/12005-1778652813/content","state_dir":"/Users/Admin/Documents/color/.superpowers/brainstorm/12005-1778652813/state"}
+{"type":"screen-added","file":"/Users/Admin/Documents/color/.superpowers/brainstorm/12005-1778652813/content/layout-options.html"}
+{"source":"user-event","type":"click","text":"C\n    \n      画布式自由布局\n      中央大画布：拖入图片，即时显示效果对照，左右两侧工具栏\n      灵活自由，适合创意探索","choice":"canvas","id":null,"timestamp":1778652991187}
+{"type":"server-stopped","reason":"idle timeout"}

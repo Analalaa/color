@@ -1,0 +1,31 @@
+<h2>系统界面布局方案</h2>
+<p class="subtitle">选择最适合你的交互结构</p>
+
+<div class="options">
+  <div class="option" data-choice="single" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>单页三区布局</h3>
+      <p>左：上传区 | 中：预览区 | 右：参考图库</p>
+      <p style="font-size:12px;color:#888;margin-top:6px;">操作路径清晰，适合精准控制</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="wizard" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>向导式分步布局</h3>
+      <p>Step 1: 上传图片 → Step 2: 选择参考图 → Step 3: 生成结果</p>
+      <p style="font-size:12px;color:#888;margin-top:6px;">引导感强，适合新用户</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="canvas" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>画布式自由布局</h3>
+      <p>中央大画布：拖入图片，即时显示效果对照，左右两侧工具栏</p>
+      <p style="font-size:12px;color:#888;margin-top:6px;">灵活自由，适合创意探索</p>
+    </div>
+  </div>
+</div>

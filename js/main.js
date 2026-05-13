@@ -17,17 +17,8 @@ class EventBus {
   }
 }
 
-const EventBus = new EventBus();
-export { EventBus };
-
-import { initDB } from './storage.js';
-import { initUpload } from './upload.js';
-import { initCanvasWorkspace } from './canvas-workspace.js';
-import { initReferenceLibrary } from './reference-library.js';
-import { initPreview } from './preview.js';
-import { initDownload } from './download.js';
-
-window.EventBus = EventBus;
+const eventBus = new EventBus();
+window.EventBus = eventBus;
 
 // Initialize toolbar controls
 function initToolbar() {
