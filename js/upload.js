@@ -55,17 +55,20 @@ export function initUpload() {
 }
 
 function openFilePicker() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = FILE_TYPES.join(',');
-  input.multiple = true;
-  input.style.display = 'none';
-  document.body.appendChild(input);
-  input.addEventListener('change', () => {
-    Array.from(input.files).forEach(file => loadImageFile(file));
-    document.body.removeChild(input);
+  const input = document.getElementById('file-input');
+  if (!input) return;
+
+  // Reset so selecting the same file twice still fires change
+  input.value = '';
+
+  // Remove any old listener to avoid stacking
+  const newInput = input.cloneNode(true);
+  input.parentNode.replaceChild(newInput, input);
+  newInput.addEventListener('change', () => {
+    Array.from(newInput.files).forEach(file => loadImageFile(file));
+    newInput.value = '';
   });
-  input.click();
+  newInput.click();
 }
 
 function loadImageFile(file) {
