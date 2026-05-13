@@ -4,6 +4,7 @@ import { transferColor } from './color-transfer/histogram-transfer.js';
 let currentResultPixels = null;
 let currentResultDimensions = { width: 0, height: 0 };
 let lastIntensity = 1.0;
+let lastRefPixels = null;
 
 export function initPreview() {
   // Listen for reference selection
@@ -24,8 +25,6 @@ export function initPreview() {
 }
 
 // Store the last reference data for re-processing on intensity change
-let lastRefPixels = null;
-
 async function handleReferenceSelected({ id, isCustom, refData }) {
   if (!refData || !refData.pixels) {
     console.warn('[preview] No reference pixel data available');
@@ -68,6 +67,7 @@ function getSourcePixels() {
   // Try to get from canvas-workspace
   if (window.canvasWorkspace && window.canvasWorkspace.getCanvasData) {
     const data = window.canvasWorkspace.getCanvasData();
+    if (!data || !data.data) return null;
     if (data) return { data: data.data, width: data.width, height: data.height };
   }
 

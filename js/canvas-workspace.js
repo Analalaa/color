@@ -74,7 +74,7 @@ export function getCanvasData() {
 }
 
 export function getCanvasDimensions() {
-  return { width: currentWidth, height: currentHeight };
+  return { width: currentCanvas?.width || 0, height: currentCanvas?.height || 0 };
 }
 
 function updateStatus(text) {
