@@ -17,6 +17,7 @@ export function initPreview() {
 
   EventBus.on('intensity-changed', (intensity) => {
     lastIntensity = intensity;
+    if (currentAlgo === 'lut') currentLut = null; // intensity baked into LUT
     runTransfer();
   });
 
