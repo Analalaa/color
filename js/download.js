@@ -1,7 +1,9 @@
 import { EventBus } from './main.js';
 import { getResultPixels, getResultDimensions } from './preview.js';
+import { showToast } from './toast.js';
 
 let downloadEnabled = false;
+let batchCounter = 0;
 
 export function initDownload() {
   // Enable download button when transfer is complete
@@ -67,11 +69,12 @@ function downloadResult() {
 
 function handleBatchStart({ images }) {
   // images is an array of {img, file} objects from canvas-workspace batch queue
-  const batchSize = images.length;
-  if (batchSize === 0) {
+  if (!Array.isArray(images) || images.length === 0) {
     showToast('没有要处理的图片');
     return;
   }
+  batchCounter++;
+  const batchSize = images.length;
 
   updateStatus(`批量处理中: 0/${batchSize}`);
 
@@ -86,47 +89,44 @@ async function processNextInBatch(images, index, total) {
     return;
   }
 
-  updateStatus(`批量处理中: ${index + 1}/${total}`);
+  try {
+    updateStatus(`批量处理中: ${index + 1}/${total}`);
 
-  const { img } = images[index];
+    const { img } = images[index];
 
-  // Create temp canvas to get pixel data
-  const canvas = document.createElement('canvas');
-  canvas.width = img.width;
-  canvas.height = img.height;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0);
-  const srcData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    // Create temp canvas to get pixel data
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const srcData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-  // Run transfer with last used ref (need to store this)
-  // For now, use a placeholder — batch transfer needs more infrastructure
-  // Just download original if no ref available
-  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    // Run transfer with last used ref (need to store this)
+    // For now, use a placeholder — batch transfer needs more infrastructure
+    // Just download original if no ref available
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 
-  // Download individually
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `colormuse_batch_${index + 1}_${Date.now()}.png`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+    // Download individually
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `colormuse_batch_${batchCounter}_${index + 1}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 
-  // Small delay to prevent browser blocking
-  await new Promise(r => setTimeout(r, 200));
+    // Small delay to prevent browser blocking
+    await new Promise(r => setTimeout(r, 200));
 
-  processNextInBatch(images, index + 1, total);
-}
-
-function showToast(message) {
-  const existing = document.querySelector('.toast');
-  if (existing) existing.remove();
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
+    processNextInBatch(images, index + 1, total);
+  } catch (err) {
+    console.error('[download] Batch item failed:', err);
+    showToast(`处理第 ${index + 1} 张图片时失败`);
+    // Continue with next
+    processNextInBatch(images, index + 1, total);
+  }
 }
 
 function updateStatus(text) {
