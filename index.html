@@ -21,7 +21,7 @@
         <div class="toolbar-section">
           <h4 class="toolbar-label">算法</h4>
           <label><input type="radio" name="algo" value="histogram" checked> 直方图迁移 (B)</label><br>
-          <label><input type="radio" name="algo" value="icc"> ICC 色域映射 (A)</label>
+          <label><input type="radio" name="algo" value="lut"> 电影仿色 LUT (A)</label>
         </div>
         <div class="toolbar-section" style="margin-top:16px">
           <h4 class="toolbar-label">迁移强度</h4>
@@ -46,6 +46,7 @@
       <span id="status-text">就绪</span>
       <div style="margin-left:auto;display:flex;gap:12px">
         <button id="btn-download" class="btn-primary" disabled>下载结果</button>
+        <button id="btn-lut-download" class="btn-secondary" disabled>下载 LUT (.CUBE)</button>
         <button id="btn-batch" class="btn-secondary" disabled>批量处理</button>
       </div>
     </footer>

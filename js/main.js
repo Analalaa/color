@@ -63,6 +63,19 @@ window.addEventListener('DOMContentLoaded', async () => {
     initToolbar();
     console.log('[Color Muse] initialized');
 
+    // Toggle download buttons based on algorithm
+    EventBus.on('algo-changed', (algo) => {
+      const btnLut = document.getElementById('btn-lut-download');
+      const btnDownload = document.getElementById('btn-download');
+      if (btnLut) {
+        btnLut.style.display = algo === 'lut' ? '' : 'none';
+        btnLut.disabled = true;
+      }
+      if (btnDownload) {
+        btnDownload.style.display = algo === 'lut' ? 'none' : '';
+      }
+    });
+
     // LUT download button
     const btnLutDownload = document.getElementById('btn-lut-download');
     if (btnLutDownload) {
