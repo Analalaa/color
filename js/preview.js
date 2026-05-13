@@ -12,10 +12,13 @@ export function initPreview() {
   // Listen for intensity changes (re-run transfer if already have result)
   EventBus.on('intensity-changed', (intensity) => {
     lastIntensity = intensity;
-    // If we already have a result and source pixels, re-run transfer
+    // Re-run transfer if we have source pixels and stored reference pixels
     const srcData = getSourcePixels();
-    if (srcData && currentResultPixels) {
-      // Need ref data - store it when reference-selected fires
+    if (srcData && lastRefPixels) {
+      const resultPixels = transferColor(srcData.data, lastRefPixels, lastIntensity);
+      currentResultPixels = resultPixels;
+      renderResult(resultPixels, srcData.width, srcData.height);
+      EventBus.emit('transfer-complete', { resultPixels, width: srcData.width, height: srcData.height });
     }
   });
 }
