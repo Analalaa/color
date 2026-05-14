@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
   <title>Color Muse — 仿色工具</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -13,38 +17,59 @@
     </header>
     <main class="app-main">
       <aside class="toolbar-left">
-        <!-- Left toolbar: upload, algorithm select, intensity slider -->
         <div class="toolbar-section">
           <h4 class="toolbar-label">上传图片</h4>
-          <button id="upload-btn" class="btn-primary" style="width:100%">选择图片</button>
+          <button id="upload-btn" class="btn-primary btn-full">选择图片</button>
         </div>
         <div class="toolbar-section">
           <h4 class="toolbar-label">算法</h4>
-          <label><input type="radio" name="algo" value="histogram" checked> 直方图迁移 (B)</label><br>
-          <label><input type="radio" name="algo" value="lut"> 电影仿色 LUT (A)</label>
+          <div class="algo-options">
+            <label class="radio-label">
+              <input type="radio" name="algo" value="histogram" checked>
+              <span class="radio-custom"></span>
+              直方图迁移
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="algo" value="lut">
+              <span class="radio-custom"></span>
+              电影仿色 LUT
+            </label>
+          </div>
         </div>
-        <div class="toolbar-section" style="margin-top:16px">
+        <div class="toolbar-section">
           <h4 class="toolbar-label">迁移强度</h4>
-          <input type="range" id="intensity-slider" min="0" max="100" value="100" style="width:100%">
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:#888">
-            <span id="intensity-min">0%</span><span id="intensity-value">100%</span><span id="intensity-max">100%</span>
+          <input type="range" id="intensity-slider" min="0" max="100" value="100">
+          <div class="slider-labels">
+            <span>0%</span>
+            <span id="intensity-value" class="slider-value">100%</span>
+            <span>100%</span>
           </div>
         </div>
       </aside>
       <section class="canvas-workspace">
-        <div id="drop-zone">拖拽图片到此处或点击上传</div>
+        <div id="drop-zone">
+          <div class="drop-zone-content">
+            <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <p>拖拽图片到此处</p>
+            <span class="drop-hint">或点击上传</span>
+          </div>
+        </div>
       </section>
       <aside class="panel-right">
         <h3 class="section-title">内置风格</h3>
         <div id="builtin-library" class="reference-grid"></div>
-        <h3 class="section-title" style="margin-top:20px">自定义图库</h3>
+        <h3 class="section-title section-title-spaced">自定义图库</h3>
         <div id="custom-library" class="reference-grid"></div>
-        <button id="upload-ref-btn" class="btn-secondary" style="margin-top:8px;width:100%">上传参考图</button>
+        <button id="upload-ref-btn" class="btn-secondary btn-full">上传参考图</button>
       </aside>
     </main>
     <footer class="app-footer">
       <span id="status-text">就绪</span>
-      <div style="margin-left:auto;display:flex;gap:12px">
+      <div class="footer-actions">
         <button id="btn-download" class="btn-primary" disabled>下载结果</button>
         <button id="btn-lut-download" class="btn-secondary" disabled>下载 LUT (.CUBE)</button>
         <button id="btn-batch" class="btn-secondary" disabled>批量处理</button>

@@ -68,7 +68,7 @@ function runTransfer() {
       let resultPixels;
       if (currentAlgo === 'lut') {
         if (!currentLut) {
-          currentLut = generateLut(lastRefPixels, 33, lastIntensity);
+          currentLut = generateLut(lastRefPixels, 33, lastIntensity, srcData.data);
         }
         resultPixels = applyLut(srcData.data, currentLut);
       } else {
@@ -120,20 +120,6 @@ function renderResult(pixels, width, height) {
 
   canvas.width = width;
   canvas.height = height;
-
-  // Pin to the bottom-right of the workspace for a side-by-side comparison preview.
-  canvas.style.position = 'absolute';
-  canvas.style.right = '20px';
-  canvas.style.bottom = '20px';
-  canvas.style.maxWidth = '40%';
-  canvas.style.maxHeight = '40%';
-  canvas.style.width = 'auto';
-  canvas.style.height = 'auto';
-  canvas.style.border = '2px solid #e94560';
-  canvas.style.borderRadius = '8px';
-  canvas.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-  canvas.style.zIndex = '10';
-  canvas.style.background = '#000';
 
   const ctx = canvas.getContext('2d');
   const imageData = new ImageData(new Uint8ClampedArray(pixels), width, height);
