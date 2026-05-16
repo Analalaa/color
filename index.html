@@ -17,32 +17,34 @@
     </header>
     <main class="app-main">
       <aside class="toolbar-left">
-        <div class="toolbar-section">
-          <h4 class="toolbar-label">上传图片</h4>
-          <button id="upload-btn" class="btn-primary btn-full">选择图片</button>
-        </div>
-        <div class="toolbar-section">
-          <h4 class="toolbar-label">算法</h4>
-          <div class="algo-options">
-            <label class="radio-label">
-              <input type="radio" name="algo" value="histogram" checked>
-              <span class="radio-custom"></span>
-              直方图迁移
-            </label>
-            <label class="radio-label">
-              <input type="radio" name="algo" value="lut">
-              <span class="radio-custom"></span>
-              电影仿色 LUT
-            </label>
+        <div class="toolbar-top">
+          <div class="toolbar-section">
+            <h4 class="toolbar-label">上传图片</h4>
+            <button id="upload-btn" class="btn-primary btn-full">选择图片</button>
           </div>
-        </div>
-        <div class="toolbar-section">
-          <h4 class="toolbar-label">迁移强度</h4>
-          <input type="range" id="intensity-slider" min="0" max="100" value="100">
-          <div class="slider-labels">
-            <span>0%</span>
-            <span id="intensity-value" class="slider-value">100%</span>
-            <span>100%</span>
+          <div class="toolbar-section">
+            <h4 class="toolbar-label">算法</h4>
+            <div class="algo-options">
+              <label class="radio-label">
+                <input type="radio" name="algo" value="histogram" checked>
+                <span class="radio-custom"></span>
+                直方图迁移
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="algo" value="lut">
+                <span class="radio-custom"></span>
+                电影仿色 LUT
+              </label>
+            </div>
+          </div>
+          <div class="toolbar-section">
+            <h4 class="toolbar-label">迁移强度</h4>
+            <input type="range" id="intensity-slider" min="0" max="100" value="100">
+            <div class="slider-labels">
+              <span>0%</span>
+              <span id="intensity-value" class="slider-value">100%</span>
+              <span>100%</span>
+            </div>
           </div>
         </div>
       </aside>
