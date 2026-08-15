@@ -1,143 +1,78 @@
-# Color Muse — 仿色工具
+# Color Muse — 三方案智能审色 Agent
 
-> 通过色彩直方图迁移技术，将参考图的色彩氛围映射到你的图片上
+Color Muse 是一个纯浏览器端运行的参考图审色工具。它不会要求用户先选择算法，而是同时比较三条色彩迁移路径，为每条路径寻找合适强度，再依据参考贴合、层次保留、曝光安全和色彩安全给出推荐、置信度与风险说明。
 
-[English](README.md) | [中文](README_zh.md)
+## 核心能力
 
----
+- 三种结果导向方案：参考还原、平衡电影感、自然色彩关系
+- 每条方案自动比较 60% / 75% / 90% / 100% 四档强度
+- 根据画面动态范围、中性色、高饱和区域和肤色候选区域调整评分权重
+- 检查 Lab 分布贴合、局部层次、明暗余量、中性色漂移和过饱和风险
+- 输出推荐方案、建议强度、四维分数、置信度和审色依据
+- Web Worker 并行生成轻量候选，仅对采用方案做全尺寸渲染
+- 支持分屏对照、JPEG/PNG、CUBE LUT、近似 Lightroom XMP、审色报告 JSON，以及带进度与取消能力的 Worker 批处理
+- 原图与参考图均保留在本地浏览器，不上传服务器
 
-## 功能特性
-
-- **纯浏览器端运行** — 无需服务器，所有计算在本地完成，图片不离开你的设备
-- **直方图色彩迁移** — 基于 LAB 色彩空间的统计色彩迁移，还原参考图的色调氛围
-- **内置风格图库** — 5 种预设风格：日系、欧美、复古、赛博、莫兰迪
-- **自定义图库** — 上传你自己的参考图，存入本地 IndexedDB
-- **迁移强度调节** — 滑块控制 0%~100%，实时预览效果
-- **批量下载** — 一次处理多张图片，打包为 ZIP 下载
-
----
-
-## 技术架构
-
-```
-浏览器 (Client)
-│
-├── Canvas API          图像读取与渲染
-├── Web Workers         色彩迁移计算（防止 UI 卡顿）
-├── IndexedDB           自定义参考图库持久化
-└── LocalStorage        用户偏好设置
-```
-
-**色彩迁移原理：** 将图片从 RGB 转换到 LAB 色彩空间，对 L/A/B 三个通道分别做直方图匹配（Histogram Matching），使源图的色彩分布趋近于参考图，最后转回 RGB 输出。
-
----
-
-## 快速开始
-
-### 方法一：直接打开
+## 快速演示
 
 ```bash
-# 克隆仓库
-git clone https://github.com/Analalaa/color.git
-cd color
-
-# 用任意 HTTP 服务器启动，例如：
-python -m http.server 8080
-# 然后浏览器打开 http://localhost:8080
+python3 -m http.server 8080
 ```
 
-### 方法二：VS Code Live Server
+打开 `http://localhost:8080`，点击“没有素材？一键演示”。应用会自动载入一组不同的原图与参考图并开始审色。
 
-在 VS Code 中安装 Live Server 扩展，右键 `index.html` → "Open with Live Server"
+建议通过 HTTP 服务运行；直接双击 `index.html` 时，部分浏览器会限制模块 Worker 或 IndexedDB。
 
-### 方法三：直接双击
+## 决策流程
 
-双击 `index.html` 即可在浏览器中打开（部分浏览器可能限制 IndexedDB 功能，建议使用 HTTP 服务器）
+```text
+原图 + 参考图
+  → 场景画像
+  → 3 条引擎路径 × 4 档强度轻预览
+  → 质量指标与风险门控
+  → 每条路径保留最佳强度
+  → 推荐方案 + 置信度 + 决策理由
+  → 仅对采用方案执行全尺寸渲染
+```
 
----
-
-## 使用方法
-
-### 1. 上传图片
-
-- **拖拽上传**：将图片文件拖入中央画布区域
-- **点击上传**：点击"选择图片"按钮或画布区域
-
-支持格式：JPEG、PNG、WebP、BMP，单文件最大 50MB。
-
-### 2. 选择参考图
-
-在右侧面板选择内置预设风格（点击缩略图），或切换到"自定义图库"上传自己的参考图。
-
-### 3. 调整迁移强度
-
-使用左侧工具栏的滑块，0% = 原图不变，100% = 完全应用参考图色调。
-
-### 4. 下载结果
-
-点击底部"下载结果"按钮，保存为 PNG 图片。
-
-如需批量处理，先在画布中加载多张图片，再点击"批量处理"。
-
----
-
-## 内置风格说明
-
-| 风格 | 色调特点 |
-|------|---------|
-| 日系 | 低饱和度、高亮度、冷调 |
-| 欧美 | 高对比度、高饱和度、暖调 |
-| 复古 | 颗粒感、褪色效果、色偏 |
-| 赛博 | 霓虹色、高对比、紫绿为主 |
-| 莫兰迪 | 低饱和灰调、柔和 |
-
----
+当前 Agent 是可解释、确定性的本地决策系统，不依赖远程大模型。`自然色彩关系`使用协方差白化—着色变换，受 Neural Preset 的综合色彩关系建模思想启发，但不声称在浏览器中运行神经网络推理。
 
 ## 项目结构
 
-```
-color/
-├── index.html                  # 主入口
-├── css/styles.css              # 样式
-├── js/
-│   ├── main.js                 # 入口模块、EventBus
-│   ├── upload.js               # 图片上传（拖拽+点击）
-│   ├── canvas-workspace.js     # 画布工作区
-│   ├── reference-library.js    # 参考图库（内置+自定义）
-│   ├── preview.js              # 色彩迁移执行与预览
-│   ├── download.js             # 下载与批量处理
-│   ├── storage.js              # IndexedDB / LocalStorage
-│   ├── toast.js                # 提示消息
-│   └── color-transfer/
-│       ├── color-space.js      # RGB ↔ LAB 色彩空间转换
-│       └── histogram-transfer.js # 直方图迁移核心算法
-└── assets/references/          # 内置参考图（占位）
+```text
+js/
+├── analysis/
+│   ├── scene-profile.js          # 场景画像
+│   ├── quality-metrics.js        # 质量指标 V2
+│   └── recommendation-policy.js  # 强度选择、风险门控、排序和置信度
+├── core/
+│   ├── engine-registry.js        # 三条引擎统一接口
+│   └── candidate-pipeline.js     # 候选与全尺寸渲染管线
+├── workers/candidate-worker.js   # Worker 计算入口
+├── ui/candidate-board.js         # 推荐摘要和候选解释界面
+├── color-transfer/               # 色彩迁移与 LUT 实现
+├── preview.js                    # 审色会话与采用状态
+└── download.js                   # 图片、LUT、XMP、报告与批处理
 ```
 
----
+## 测试
 
-## 进阶自定义
+```bash
+npm test
 
-### 替换内置参考图
+for file in $(rg --files js -g '*.js'); do
+  node --check "$file"
+done
+```
 
-将真实图片放入 `assets/references/{风格}/` 目录，更新 `js/reference-library.js` 中的 `BUILTIN_REFS` 列表的 URL 路径。
+测试覆盖引擎统一接口、零强度恒等输出、参考增益、局部层次损失、曝光与中性色风险、场景画像、强度风险门控、候选排序和推荐置信度。
 
-### 添加新的色彩迁移算法
+## 输出说明
 
-在 `js/color-transfer/` 目录下创建新的算法文件（如 `icc-transfer.js`），在 `reference-library.js` 的算法切换逻辑中引入即可。
-
----
-
-## 浏览器兼容性
-
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-
-建议使用最新版 Chrome 以获得最佳性能。
-
----
+- `参考还原`是像素级结果，不提供可复用 LUT。
+- `平衡电影感`与`自然色彩关系`可导出 CUBE LUT。
+- Lightroom XMP 是从 3D LUT 采样得到的近似参数，不能保证与 CUBE 在所有照片上完全一致。
+- 审色报告 JSON 不包含原图像素，只记录场景画像、候选分数、风险、推荐和最终采用参数。
 
 ## License
 

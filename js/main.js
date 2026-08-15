@@ -4,6 +4,8 @@ import { initCanvasWorkspace } from './canvas-workspace.js';
 import { initReferenceLibrary } from './reference-library.js';
 import { initPreview } from './preview.js';
 import { initDownload } from './download.js';
+import { initSplitCompare } from './split-compare.js';
+import { initCandidateBoard } from './ui/candidate-board.js';
 import { showToast } from './toast.js';
 
 class EventBusImpl {
@@ -31,12 +33,6 @@ window.EventBus = EventBus;
 window.showToast = showToast;
 
 function initToolbar() {
-  document.querySelectorAll('input[name="algo"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      EventBus.emit('algo-changed', e.target.value);
-    });
-  });
-
   const intensitySlider = document.getElementById('intensity-slider');
   const intensityValueEl = document.getElementById('intensity-value');
   if (intensitySlider) {
@@ -54,44 +50,35 @@ function initToolbar() {
 
 window.addEventListener('DOMContentLoaded', async () => {
   try {
-    await initDB();
+    try {
+      await initDB();
+    } catch (storageError) {
+      console.warn('[Color Muse] Custom reference storage unavailable:', storageError);
+    }
     initUpload();
     initCanvasWorkspace();
     await initReferenceLibrary();
+    initCandidateBoard();
     initPreview();
     initDownload();
+    initSplitCompare();
     initToolbar();
     console.log('[Color Muse] initialized');
 
-    // Toggle download buttons based on algorithm
-    EventBus.on('algo-changed', (algo) => {
-      const btnLut = document.getElementById('btn-lut-download');
-      const btnDownload = document.getElementById('btn-download');
-      if (btnLut) {
-        btnLut.style.display = algo === 'lut' ? '' : 'none';
-        btnLut.disabled = true;
-      }
-      if (btnDownload) {
-        btnDownload.style.display = algo === 'lut' ? 'none' : '';
+    // Enable toggle button when transfer completes
+    EventBus.on('transfer-complete', ({ hasOriginal }) => {
+      const toggleBtn = document.getElementById('btn-toggle-display');
+      if (toggleBtn && hasOriginal) {
+        toggleBtn.disabled = false;
       }
     });
 
-    // LUT download button
-    const btnLutDownload = document.getElementById('btn-lut-download');
-    if (btnLutDownload) {
-      btnLutDownload.addEventListener('click', () => {
-        import('./preview.js').then(mod => mod.downloadCurrentLut());
-      });
-    }
-
-    // Enable LUT download button when transfer completes and algo is LUT
-    EventBus.on('transfer-complete', () => {
-      const currentAlgo = document.querySelector('input[name="algo"]:checked');
-      const btnLut = document.getElementById('btn-lut-download');
-      if (btnLut && currentAlgo && currentAlgo.value === 'lut') {
-        btnLut.disabled = false;
-      }
+    EventBus.on('result-invalidated', () => {
+      const toggleBtn = document.getElementById('btn-toggle-display');
+      if (toggleBtn) toggleBtn.disabled = true;
     });
+
+    // Split compare button is handled by split-compare.js via EventBus
   } catch (err) {
     console.error('[Color Muse] Initialization failed:', err);
     showToast('初始化失败: ' + err.message);

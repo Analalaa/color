@@ -4,10 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
-  <title>Color Muse — 仿色工具</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+  <title>Color Muse — 三方案智能审色 Agent</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -15,27 +13,26 @@
     <header class="app-header">
       <h1>Color Muse</h1>
     </header>
+    <div class="app-desc">
+      <div class="app-desc-title">Color Muse：不是套滤镜，而是替你比较哪种仿色更适合这张画面</div>
+      <div class="app-desc-body">为三条色彩路径自动寻找建议强度，综合参考贴合、层次保护与偏色风险给出可解释推荐</div>
+    </div>
     <main class="app-main">
       <aside class="toolbar-left">
         <div class="toolbar-top">
           <div class="toolbar-section">
             <h4 class="toolbar-label">上传图片</h4>
             <button id="upload-btn" class="btn-primary btn-full">选择图片</button>
+            <button id="sample-btn" class="btn-text btn-full" type="button">没有素材？一键演示</button>
           </div>
           <div class="toolbar-section">
-            <h4 class="toolbar-label">算法</h4>
-            <div class="algo-options">
-              <label class="radio-label">
-                <input type="radio" name="algo" value="histogram" checked>
-                <span class="radio-custom"></span>
-                直方图迁移
-              </label>
-              <label class="radio-label">
-                <input type="radio" name="algo" value="lut">
-                <span class="radio-custom"></span>
-                电影仿色 LUT
-              </label>
+            <h4 class="toolbar-label">智能审色</h4>
+            <div class="smart-mode-card">
+              <span class="smart-mode-kicker">COLOR AGENT</span>
+              <strong>同时比较三条仿色路径</strong>
+              <p>自动比较多档强度，检查参考贴合、明暗层次、中性色偏移与溢色风险。</p>
             </div>
+            <button id="generate-candidates-btn" class="btn-primary btn-full" disabled>生成智能方案</button>
           </div>
           <div class="toolbar-section">
             <h4 class="toolbar-label">迁移强度</h4>
@@ -44,6 +41,63 @@
               <span>0%</span>
               <span id="intensity-value" class="slider-value">100%</span>
               <span>100%</span>
+            </div>
+          </div>
+          <div class="toolbar-section">
+            <h4 class="toolbar-label">预览对照</h4>
+            <button id="btn-toggle-display" class="btn-toggle" disabled>
+              <span class="toggle-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="7" height="18" rx="1"/>
+                  <rect x="14" y="3" width="7" height="18" rx="1"/>
+                </svg>
+              </span>
+              <span id="toggle-label">分屏对照</span>
+            </button>
+          </div>
+          <div class="toolbar-section">
+            <h4 class="toolbar-label">灵感参考</h4>
+            <div class="ref-links">
+              <a class="ref-link" href="https://www.pinterest.com/" target="_blank" rel="noopener">
+                <span class="ref-link-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+                </span>
+                <span class="ref-link-text">
+                  <span class="ref-link-name">Pinterest</span>
+                  <span class="ref-link-desc">色彩板与视觉灵感</span>
+                </span>
+                <span class="ref-link-arrow">→</span>
+              </a>
+              <a class="ref-link" href="https://www.nowness.com/" target="_blank" rel="noopener">
+                <span class="ref-link-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 2h16a2 2 0 012 2v16a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2zm5.5 5L6 12l3.5 5h1.2L7.4 12l3.3-5H9.5zm5 0L11 12l3.5 5h1.2L12.4 12l3.3-5h-1.2z"/></svg>
+                </span>
+                <span class="ref-link-text">
+                  <span class="ref-link-name">Nowness</span>
+                  <span class="ref-link-desc">高端艺术短片调色</span>
+                </span>
+                <span class="ref-link-arrow">→</span>
+              </a>
+              <a class="ref-link" href="https://film-grab.com/" target="_blank" rel="noopener">
+                <span class="ref-link-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
+                </span>
+                <span class="ref-link-text">
+                  <span class="ref-link-name">FilmGrab</span>
+                  <span class="ref-link-desc">经典电影截图数据库</span>
+                </span>
+                <span class="ref-link-arrow">→</span>
+              </a>
+              <a class="ref-link" href="https://www.ysjf.com/material" target="_blank" rel="noopener">
+                <span class="ref-link-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM10 8l5 4-5 4V8z"/></svg>
+                </span>
+                <span class="ref-link-text">
+                  <span class="ref-link-name">影视飓风素材库</span>
+                  <span class="ref-link-desc">视频创作者色彩素材</span>
+                </span>
+                <span class="ref-link-arrow">→</span>
+              </a>
             </div>
           </div>
         </div>
@@ -60,8 +114,31 @@
             <span class="drop-hint">或点击上传</span>
           </div>
         </div>
+        <canvas id="split-overlay-canvas"></canvas>
+        <div id="processing-spinner" class="processing-spinner hidden">
+          <div class="spinner-ring"></div>
+        </div>
       </section>
       <aside class="panel-right">
+        <section class="candidate-section">
+          <div class="candidate-section-heading">
+            <h3 class="section-title">智能方案</h3>
+            <button id="regenerate-candidates-btn" class="candidate-refresh" type="button" disabled>重新比较</button>
+          </div>
+          <p id="candidate-status" class="candidate-status">上传原图并选择参考图后自动生成</p>
+          <div id="candidate-recommendation" class="candidate-recommendation hidden" aria-live="polite">
+            <div class="candidate-recommendation-heading">
+              <strong id="candidate-recommendation-title"></strong>
+              <span id="candidate-recommendation-confidence"></span>
+            </div>
+            <p id="candidate-recommendation-reason"></p>
+            <div id="candidate-scene-tags" class="candidate-scene-tags"></div>
+          </div>
+          <div id="candidate-board" class="candidate-board">
+            <p class="candidate-empty">三种候选会显示在这里</p>
+          </div>
+        </section>
+        <div class="panel-divider"></div>
         <h3 class="section-title">内置风格</h3>
         <div id="builtin-library" class="reference-grid"></div>
         <h3 class="section-title section-title-spaced">自定义图库</h3>
@@ -71,9 +148,44 @@
     </main>
     <footer class="app-footer">
       <span id="status-text">就绪</span>
+      <span class="footer-feedback">有任何想法欢迎通过邮箱反馈：<a href="mailto:an_missu@163.com">an_missu@163.com</a></span>
       <div class="footer-actions">
-        <button id="btn-download" class="btn-primary" disabled>下载结果</button>
-        <button id="btn-lut-download" class="btn-secondary" disabled>下载 LUT (.CUBE)</button>
+        <div class="download-dropdown" id="download-dropdown">
+          <button id="btn-download" class="btn-primary" disabled>下载结果</button>
+          <div class="download-menu" id="download-menu">
+            <div class="download-menu-section">
+              <div class="download-menu-label">图片导出</div>
+              <button class="download-menu-item" data-action="download-jpg">
+                <span class="download-menu-icon"> JPG</span>
+                <span>下载 JPEG 图片</span>
+              </button>
+              <button class="download-menu-item" data-action="download-png">
+                <span class="download-menu-icon"> PNG</span>
+                <span>下载 PNG 图片</span>
+              </button>
+            </div>
+            <div class="download-menu-divider"></div>
+            <div class="download-menu-section">
+              <div class="download-menu-label">LUT 导出</div>
+              <button class="download-menu-item" data-action="download-cube" data-requires-lut disabled>
+                <span class="download-menu-icon">🎬</span>
+                <span>下载 .CUBE LUT</span>
+              </button>
+              <button class="download-menu-item" data-action="download-lr" data-requires-lut disabled>
+                <span class="download-menu-icon">📷</span>
+                <span>导出近似 Lightroom 预设</span>
+              </button>
+            </div>
+            <div class="download-menu-divider"></div>
+            <div class="download-menu-section">
+              <div class="download-menu-label">审色记录</div>
+              <button class="download-menu-item" data-action="download-report">
+                <span class="download-menu-icon">JSON</span>
+                <span>下载审色报告</span>
+              </button>
+            </div>
+          </div>
+        </div>
         <button id="btn-batch" class="btn-secondary" disabled>批量处理</button>
       </div>
     </footer>

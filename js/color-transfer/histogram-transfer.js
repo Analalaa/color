@@ -1,35 +1,45 @@
 import { rgbToLab, labToRgb } from './color-space.js';
 
-// Compute 256-bin histogram for channel data
 function computeHistogram(channelData) {
-  const hist = new Array(256).fill(0);
+  const hist = new Uint32Array(256);
   for (let i = 0; i < channelData.length; i++) {
-    const idx = Math.max(0, Math.min(255, Math.round(channelData[i])));
-    hist[idx]++;
+    let v = channelData[i] | 0;
+    if (v < 0) v = 0;
+    else if (v > 255) v = 255;
+    hist[v]++;
   }
   return hist;
 }
 
-// Compute cumulative distribution function, normalized to [0, 255]
 function computeCDF(hist) {
-  const cdf = new Array(256);
+  const cdf = new Uint32Array(256);
   let sum = 0;
   for (let i = 0; i < 256; i++) {
     sum += hist[i];
     cdf[i] = sum;
   }
-  const min = cdf.find(v => v > 0);
-  const max = cdf[255];
-  return cdf.map(v => Math.round(((v - min) / (max - min)) * 255));
+  const total = cdf[255];
+  if (total === 0) return cdf;
+  let minIdx = 0;
+  while (minIdx < 256 && cdf[minIdx] === 0) minIdx++;
+  const min = cdf[minIdx];
+  const range = total - min || 1;
+  const out = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) {
+    out[i] = Math.round(((cdf[i] - min) / range) * 255);
+  }
+  return out;
 }
 
-// Build mapping: for each target value, find closest source CDF value
-function buildMatchMap(sourceCDF, targetCDF) {
-  const map = new Array(256);
-  let si = 0;
-  for (let ti = 0; ti < 256; ti++) {
-    while (si < 255 && sourceCDF[si] < targetCDF[ti]) si++;
-    map[ti] = si;
+// For each source value v, return the reference value y where refCDF[y] >= srcCDF[v].
+// This is the standard histogram-specification mapping: output gets the reference distribution.
+function buildMatchMap(srcCDF, refCDF) {
+  const map = new Uint8Array(256);
+  let y = 0;
+  for (let v = 0; v < 256; v++) {
+    const target = srcCDF[v];
+    while (y < 255 && refCDF[y] < target) y++;
+    map[v] = y;
   }
   return map;
 }
@@ -44,48 +54,47 @@ function buildMatchMap(sourceCDF, targetCDF) {
 export function transferColor(srcPixels, refPixels, intensity = 1.0) {
   const len = srcPixels.length;
   const out = new Uint8ClampedArray(len);
+  const srcCount = len >> 2;
+  const refCount = refPixels.length >> 2;
 
-  // Extract L, a, b channels for source and reference
-  const srcL = [], srcA = [], srcB = [];
-  const refL = [], refA = [], refB = [];
-
-  for (let i = 0; i < len; i += 4) {
-    const [L1, a1, b1] = rgbToLab(srcPixels[i], srcPixels[i+1], srcPixels[i+2]);
-    const [L2, a2, b2] = rgbToLab(refPixels[i], refPixels[i+1], refPixels[i+2]);
-    srcL.push(L1 * 2.55); srcA.push(a1 + 128); srcB.push(b1 + 128); // shift to 0-255 range
-    refL.push(L2 * 2.55); refA.push(a2 + 128); refB.push(b2 + 128);
+  const srcL = new Uint8Array(srcCount);
+  const srcA = new Uint8Array(srcCount);
+  const srcB = new Uint8Array(srcCount);
+  for (let i = 0, j = 0; i < len; i += 4, j++) {
+    const [L, a, b] = rgbToLab(srcPixels[i], srcPixels[i + 1], srcPixels[i + 2]);
+    srcL[j] = Math.max(0, Math.min(255, Math.round(L * 2.55)));
+    srcA[j] = Math.max(0, Math.min(255, Math.round(a + 128)));
+    srcB[j] = Math.max(0, Math.min(255, Math.round(b + 128)));
   }
 
-  // Build CDF match maps for each channel
-  const srcLCDF = computeCDF(computeHistogram(srcL));
-  const refLCDF = computeCDF(computeHistogram(refL));
-  const mapL = buildMatchMap(srcLCDF, refLCDF);
+  const refL = new Uint8Array(refCount);
+  const refA = new Uint8Array(refCount);
+  const refB = new Uint8Array(refCount);
+  for (let i = 0, j = 0; i < refPixels.length; i += 4, j++) {
+    const [L, a, b] = rgbToLab(refPixels[i], refPixels[i + 1], refPixels[i + 2]);
+    refL[j] = Math.max(0, Math.min(255, Math.round(L * 2.55)));
+    refA[j] = Math.max(0, Math.min(255, Math.round(a + 128)));
+    refB[j] = Math.max(0, Math.min(255, Math.round(b + 128)));
+  }
 
-  const srcACDF = computeCDF(computeHistogram(srcA));
-  const refACDF = computeCDF(computeHistogram(refA));
-  const mapA = buildMatchMap(srcACDF, refACDF);
+  const mapL = buildMatchMap(computeCDF(computeHistogram(srcL)), computeCDF(computeHistogram(refL)));
+  const mapA = buildMatchMap(computeCDF(computeHistogram(srcA)), computeCDF(computeHistogram(refA)));
+  const mapB = buildMatchMap(computeCDF(computeHistogram(srcB)), computeCDF(computeHistogram(refB)));
 
-  const srcBCDF = computeCDF(computeHistogram(srcB));
-  const refBCDF = computeCDF(computeHistogram(refB));
-  const mapB = buildMatchMap(srcBCDF, refBCDF);
-
-  // Apply matching with intensity blending
   for (let i = 0, j = 0; i < len; i += 4, j++) {
-    const L_shifted = Math.round(srcL[j]);
-    const a_shifted = Math.round(srcA[j]);
-    const b_shifted = Math.round(srcB[j]);
+    const L_new = mapL[srcL[j]] / 2.55;
+    const a_new = mapA[srcA[j]] - 128;
+    const b_new = mapB[srcB[j]] - 128;
 
-    const L_new = mapL[L_shifted];
-    const a_new = mapA[a_shifted] - 128; // shift back
-    const b_new = mapB[b_shifted] - 128;
-
-    const [origR, origG, origB] = [srcPixels[i], srcPixels[i+1], srcPixels[i+2]];
+    const origR = srcPixels[i];
+    const origG = srcPixels[i + 1];
+    const origBch = srcPixels[i + 2];
     const [newR, newG, newB] = labToRgb(L_new, a_new, b_new);
 
-    out[i]   = Math.round(origR + (newR - origR) * intensity);
-    out[i+1] = Math.round(origG + (newG - origG) * intensity);
-    out[i+2] = Math.round(origB + (newB - origB) * intensity);
-    out[i+3] = srcPixels[i+3]; // preserve alpha
+    out[i] = Math.round(origR + (newR - origR) * intensity);
+    out[i + 1] = Math.round(origG + (newG - origG) * intensity);
+    out[i + 2] = Math.round(origBch + (newB - origBch) * intensity);
+    out[i + 3] = srcPixels[i + 3];
   }
 
   return out;

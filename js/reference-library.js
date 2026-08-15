@@ -14,6 +14,24 @@ const BUILTIN_REFS = [
 
 let selectedRefId = null;
 let selectedIsCustom = false;
+let referenceSelectionSerial = 0;
+
+function imageToReferenceData(img, maxSide = 1024) {
+  const sourceWidth = img.naturalWidth || img.width;
+  const sourceHeight = img.naturalHeight || img.height;
+  const scale = Math.min(1, maxSide / Math.max(sourceWidth, sourceHeight));
+  const width = Math.max(1, Math.round(sourceWidth * scale));
+  const height = Math.max(1, Math.round(sourceHeight * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d');
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = 'high';
+  context.drawImage(img, 0, 0, width, height);
+  const data = context.getImageData(0, 0, width, height);
+  return { pixels: data.data, width, height };
+}
 
 export async function initReferenceLibrary() {
   renderBuiltinRefs();
@@ -35,9 +53,9 @@ function renderBuiltinRefs() {
   container.innerHTML = BUILTIN_REFS.map(ref => {
     const encodedUrl = encodeURI(ref.url);
     return `
-    <div class="ref-thumb" data-id="${ref.id}" data-category="${ref.category}" onclick="window.selectBuiltinRef('${ref.id}')">
-      <img src="${encodedUrl}" alt="${ref.category}" onerror="this.parentElement.style.display='none'">
-    </div>
+    <button type="button" class="ref-thumb" data-id="${ref.id}" data-category="${ref.category}" aria-label="选择${ref.category}参考图" onclick="window.selectBuiltinRef('${ref.id}')">
+      <img src="${encodedUrl}" alt="${ref.category}参考图" loading="lazy" decoding="async" onerror="this.parentElement.style.display='none'">
+    </button>
   `;
   }).join('');
 }
@@ -51,14 +69,8 @@ async function loadBuiltinRefPixels(id) {
     try {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth || img.width;
-        canvas.height = img.naturalHeight || img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
         try {
-          const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          resolve({ pixels: data.data, width: canvas.width, height: canvas.height });
+          resolve(imageToReferenceData(img));
         } catch (err) {
           console.error('[reference-library] getImageData failed (CORS/tainted?):', err);
           resolve(null);
@@ -89,9 +101,9 @@ async function renderCustomRefs() {
     }
 
     container.innerHTML = customs.map(ref => `
-      <div class="ref-thumb" data-id="${ref.id}" onclick="window.selectCustomRef('${ref.id}')">
+      <button type="button" class="ref-thumb" data-id="${ref.id}" aria-label="选择自定义参考图" onclick="window.selectCustomRef('${ref.id}')">
         <img src="${ref.thumbnail}" alt="custom">
-      </div>
+      </button>
     `).join('');
   } catch (err) {
     console.error('[reference-library] Failed to load custom refs:', err);
@@ -109,13 +121,14 @@ async function loadCustomRefPixels(id) {
       const img = new Image();
       const url = URL.createObjectURL(ref.blob);
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        URL.revokeObjectURL(url);
-        resolve({ pixels: ctx.getImageData(0, 0, img.width, img.height).data, width: img.width, height: img.height });
+        try {
+          resolve(imageToReferenceData(img));
+        } catch (error) {
+          console.error('[reference-library] Failed to decode custom reference:', error);
+          resolve(null);
+        } finally {
+          URL.revokeObjectURL(url);
+        }
       };
       img.onerror = () => {
         URL.revokeObjectURL(url);
@@ -131,12 +144,15 @@ async function loadCustomRefPixels(id) {
 
 // Select a built-in reference image
 window.selectBuiltinRef = async function(id) {
+  const requestId = ++referenceSelectionSerial;
   selectRefElement(id);
+  EventBus.emit('reference-selection-started', { id, isCustom: false });
   selectedRefId = id;
   selectedIsCustom = false;
 
   // Load reference image pixels and emit
   const refData = await loadBuiltinRefPixels(id);
+  if (requestId !== referenceSelectionSerial) return;
   if (refData) {
     EventBus.emit('reference-selected', { id, isCustom: false, refData });
   } else if (window.showToast) {
@@ -146,11 +162,14 @@ window.selectBuiltinRef = async function(id) {
 
 // Select a custom reference image
 window.selectCustomRef = async function(id) {
+  const requestId = ++referenceSelectionSerial;
   selectRefElement(id);
+  EventBus.emit('reference-selection-started', { id, isCustom: true });
   selectedRefId = id;
   selectedIsCustom = true;
 
   const refData = await loadCustomRefPixels(id);
+  if (requestId !== referenceSelectionSerial) return;
   if (refData) {
     EventBus.emit('reference-selected', { id, isCustom: true, refData });
   } else if (window.showToast) {

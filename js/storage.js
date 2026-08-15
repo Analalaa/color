@@ -59,12 +59,25 @@ export async function deleteReferenceImage(id) {
 }
 
 export function savePreference(key, value) {
-  const prefs = JSON.parse(localStorage.getItem('colormuse_preferences') || '{}');
+  let prefs = {};
+  try {
+    prefs = JSON.parse(localStorage.getItem('colormuse_preferences') || '{}');
+  } catch {
+    prefs = {};
+  }
   prefs[key] = value;
-  localStorage.setItem('colormuse_preferences', JSON.stringify(prefs));
+  try {
+    localStorage.setItem('colormuse_preferences', JSON.stringify(prefs));
+  } catch {
+    // Preferences are optional; private browsing may disable storage.
+  }
 }
 
 export function getPreference(key, defaultValue) {
-  const prefs = JSON.parse(localStorage.getItem('colormuse_preferences') || '{}');
-  return prefs[key] !== undefined ? prefs[key] : defaultValue;
+  try {
+    const prefs = JSON.parse(localStorage.getItem('colormuse_preferences') || '{}');
+    return prefs[key] !== undefined ? prefs[key] : defaultValue;
+  } catch {
+    return defaultValue;
+  }
 }

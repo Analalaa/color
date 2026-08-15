@@ -6,6 +6,7 @@ const FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/bmp'];
 export function initUpload() {
   const dropZone = document.getElementById('drop-zone');
   const uploadBtn = document.getElementById('upload-btn');
+  const sampleBtn = document.getElementById('sample-btn');
 
   EventBus.on('dropzone-hide', () => {
     const dropZone = document.getElementById('drop-zone');
@@ -24,6 +25,10 @@ export function initUpload() {
 
   uploadBtn.addEventListener('click', () => {
     openFilePicker();
+  });
+
+  sampleBtn?.addEventListener('click', () => {
+    loadSampleImage();
   });
 
   // Drag and drop
@@ -52,6 +57,27 @@ export function initUpload() {
     }
     validFiles.forEach(file => loadImageFile(file));
   });
+}
+
+function loadSampleImage() {
+  const img = new Image();
+  img.onload = () => {
+    EventBus.emit('image-loaded', {
+      file: null,
+      img,
+      dataUrl: img.src,
+      name: 'Color Muse 示例原图',
+      size: 0
+    });
+    if (typeof window.selectBuiltinRef === 'function') {
+      window.selectBuiltinRef('vintage-2');
+      showToast('演示素材已载入，正在自动审色');
+    } else {
+      showToast('示例原图已载入，请选择右侧参考风格');
+    }
+  };
+  img.onerror = () => showToast('示例图片加载失败');
+  img.src = encodeURI('assets/references/复古/find.jpg');
 }
 
 function openFilePicker() {
