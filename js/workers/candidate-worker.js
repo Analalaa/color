@@ -13,7 +13,8 @@ self.onmessage = event => {
     intensities,
     includeLut,
     calculateMetrics,
-    sceneProfile
+    sceneProfile,
+    recipeOptions
   } = event.data;
 
   try {
@@ -50,12 +51,13 @@ self.onmessage = event => {
       return;
     }
 
-    const { resultPixels, lut } = runEngine({
+    const { resultPixels, lut, recipe } = runEngine({
       engineId,
       sourcePixels,
       referencePixels,
       intensity,
-      includeLut
+      includeLut,
+      recipeOptions
     });
     const assessment = calculateMetrics
       ? assessQuality(sourcePixels, resultPixels, referencePixels, {
@@ -72,6 +74,7 @@ self.onmessage = event => {
       engineId,
       resultBuffer: resultPixels.buffer,
       lutBuffer: lut ? lut.buffer : null,
+      recipe: recipe || null,
       assessment
     }, transferables);
   } catch (error) {

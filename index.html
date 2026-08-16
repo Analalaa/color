@@ -166,6 +166,28 @@
             <div><span>中性色偏移</span><strong id="anatomy-neutral">—</strong></div>
           </div>
 
+          <div id="reference-recipe-panel" class="anatomy-block reference-recipe-panel hidden">
+            <div class="anatomy-block-heading">
+              <div class="recipe-v2-title"><strong>Reference Recipe</strong><span>V2 · 实算参数</span></div>
+              <span id="recipe-layer-count">0 层</span>
+            </div>
+            <p id="reference-recipe-status" class="anatomy-help">参考还原方案会在这里显示真正参与渲染的参数。</p>
+            <div class="recipe-curve-heading">
+              <strong>参考色调曲线</strong>
+              <span>输入 L* → 输出 L*</span>
+            </div>
+            <canvas id="recipe-tone-curve" width="296" height="184" aria-label="参考色调曲线与明度直方图"></canvas>
+            <div class="recipe-curve-legend" aria-hidden="true">
+              <span class="source">原图分布</span><span class="reference">参考分布</span><span class="result">结果分布</span><span class="curve">实际曲线</span>
+            </div>
+            <div class="recipe-point-heading">
+              <strong>Point Color</strong>
+              <span>点击可视化范围</span>
+            </div>
+            <div id="recipe-point-colors" class="recipe-point-colors"></div>
+            <p id="recipe-point-explanation" class="anatomy-help">每个颜色范围都有独立的色相、彩度、明度参数。</p>
+          </div>
+
           <div class="anatomy-block">
             <div class="anatomy-block-heading">
               <strong>分量图</strong>
@@ -221,7 +243,7 @@
           <div class="anatomy-block">
             <div class="anatomy-block-heading">
               <strong>Color Recipe</strong>
-              <span>可复用处方</span>
+              <span id="recipe-stack-caption">可复用处方</span>
             </div>
             <div id="color-recipe-stack" class="color-recipe-stack">
               <p class="candidate-empty">调色步骤会显示在这里</p>
