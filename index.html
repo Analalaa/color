@@ -18,6 +18,53 @@
 </head>
 <body class="editorial-lab">
   <a class="skip-link" href="#workspace">跳到画面工作区</a>
+  <section id="intro-gate" class="intro-gate" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+    <div class="intro-atmosphere" aria-hidden="true">
+      <span class="intro-haze intro-haze-one"></span>
+      <span class="intro-haze intro-haze-two"></span>
+      <span class="intro-grain"></span>
+    </div>
+    <header class="intro-header">
+      <div class="intro-identity">
+        <strong>COLOR MUSE</strong>
+        <span>// INTELLIGENT COLOR DIRECTION</span>
+      </div>
+      <nav class="intro-nav" aria-label="产品能力">
+        <span>REFERENCE</span>
+        <span>COLOR DNA</span>
+        <span>RECIPE</span>
+      </nav>
+      <div class="intro-system">
+        <span>SYS.OP. / READY</span>
+        <span>COLOR SPACE / LAB</span>
+        <button id="intro-skip-btn" type="button">跳过引导</button>
+      </div>
+    </header>
+    <div class="intro-hero">
+      <div class="intro-transmitting"><i></i><span>NOW READING COLOR RELATIONSHIPS</span><i></i></div>
+      <p class="intro-kicker">不是套用一种滤镜，而是理解一张画面</p>
+      <h2 id="intro-title">在颜色之间<br><em>找到答案</em></h2>
+      <p class="intro-subtitle">比较三种方向，解释每一次变化，留下可以再次使用的调色处方。</p>
+      <div class="intro-signal"><i></i><span>03 DIRECTIONS / 01 REASONED CHOICE</span></div>
+      <button id="intro-enter-btn" class="intro-enter-btn" type="button">
+        <span>进入审色工作台</span>
+        <small>ENTER ↘</small>
+      </button>
+    </div>
+    <footer class="intro-footer">
+      <div class="intro-data">
+        <span>INPUT: YOUR IMAGE</span>
+        <span>REFERENCE: YOUR INTENT</span>
+        <span>OUTPUT: EXPLAINABLE COLOR</span>
+      </div>
+      <span class="intro-compass" aria-hidden="true">✦</span>
+      <ol class="intro-directions">
+        <li><span>01</span> 参考还原</li>
+        <li><span>02</span> 平衡电影感</li>
+        <li><span>03</span> 自然色彩关系</li>
+      </ol>
+    </footer>
+  </section>
   <div id="app">
     <header class="app-header">
       <a class="brand-lockup" href="#" aria-label="Color Muse 首页">
@@ -31,6 +78,7 @@
       <div class="header-edition">
         <span>REFERENCE RECIPE</span>
         <strong>V2 / BETA</strong>
+        <button id="reopen-intro-btn" type="button">OPENING ↗</button>
       </div>
     </header>
     <div class="app-desc">
