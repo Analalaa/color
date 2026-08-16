@@ -3,106 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light">
-  <title>Color Muse — 三方案智能审色 Agent</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#11120f">
+  <meta name="description" content="Color Muse 将参考色拆解为三种可比较方案，并用 Color DNA、Scopes 与可复用处方解释每一次颜色变化。">
+  <title>Color Muse — Intelligent Color Direction</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="editorial-lab">
+  <a class="skip-link" href="#workspace">跳到画面工作区</a>
   <div id="app">
     <header class="app-header">
-      <h1>Color Muse</h1>
+      <a class="brand-lockup" href="#" aria-label="Color Muse 首页">
+        <span class="brand-code">CM—26</span>
+        <h1><span>Color</span> <em>Muse</em></h1>
+      </a>
+      <div class="header-statement">
+        <span>Intelligent color direction</span>
+        <p>把参考色，变成能看懂、能调整、能复用的决定。</p>
+      </div>
+      <div class="header-edition">
+        <span>REFERENCE RECIPE</span>
+        <strong>V2 / BETA</strong>
+      </div>
     </header>
     <div class="app-desc">
-      <div class="app-desc-title">Color Muse：不是套滤镜，而是替你比较哪种仿色更适合这张画面</div>
-      <div class="app-desc-body">为三条色彩路径自动寻找建议强度，综合参考贴合、层次保护与偏色风险给出可解释推荐</div>
+      <div class="workflow-index" aria-label="核心工作流">
+        <button type="button" data-workflow-target="input"><span>01</span> INPUT / 输入</button>
+        <button type="button" data-workflow-target="review"><span>02</span> REVIEW / 审色</button>
+        <button type="button" data-workflow-target="recipe"><span>03</span> RECIPE / 拆解</button>
+      </div>
+      <p class="app-desc-body">Three directions. One reasoned choice. Every adjustment stays visible.</p>
+      <button id="focus-mode-btn" class="focus-mode-btn" type="button" aria-pressed="false">
+        <span>专注画面</span><kbd>F</kbd>
+      </button>
     </div>
     <main class="app-main">
-      <aside class="toolbar-left">
+      <aside class="toolbar-left" id="input-panel" data-workflow-section="input">
+        <div class="rail-heading">
+          <span>01 / INPUT</span>
+          <strong>建立色彩关系</strong>
+          <p>先放入你的画面，再选择一张希望接近的参考。</p>
+        </div>
         <div class="toolbar-top">
           <div class="toolbar-section">
-            <h4 class="toolbar-label">上传图片</h4>
-            <button id="upload-btn" class="btn-primary btn-full">选择图片</button>
-            <button id="sample-btn" class="btn-text btn-full" type="button">没有素材？一键演示</button>
+            <h4 class="toolbar-label"><span>01.A</span> 原始画面</h4>
+            <button id="upload-btn" class="btn-primary btn-full">选择原图 <span>↗</span></button>
+            <button id="sample-btn" class="btn-text btn-full" type="button">没有素材？载入完整演示</button>
           </div>
           <div class="toolbar-section">
-            <h4 class="toolbar-label">智能审色</h4>
+            <h4 class="toolbar-label"><span>01.B</span> 生成方向</h4>
             <div class="smart-mode-card">
-              <span class="smart-mode-kicker">COLOR AGENT</span>
-              <strong>同时比较三条仿色路径</strong>
-              <p>自动比较多档强度，检查参考贴合、明暗层次、中性色偏移与溢色风险。</p>
+              <span class="smart-mode-kicker">COLOR AGENT / 03 PATHS</span>
+              <strong>让算法先提出三种意见</strong>
+              <p>比较贴合、层次、中性色与溢色风险，再给出有依据的推荐。</p>
             </div>
-            <button id="generate-candidates-btn" class="btn-primary btn-full" disabled>生成智能方案</button>
-          </div>
-          <div class="toolbar-section">
-            <h4 class="toolbar-label">迁移强度</h4>
-            <input type="range" id="intensity-slider" min="0" max="100" value="100">
-            <div class="slider-labels">
-              <span>0%</span>
-              <span id="intensity-value" class="slider-value">100%</span>
-              <span>100%</span>
-            </div>
-          </div>
-          <div class="toolbar-section">
-            <h4 class="toolbar-label">预览对照</h4>
-            <button id="btn-toggle-display" class="btn-toggle" disabled>
-              <span class="toggle-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="3" width="7" height="18" rx="1"/>
-                  <rect x="14" y="3" width="7" height="18" rx="1"/>
-                </svg>
-              </span>
-              <span id="toggle-label">分屏对照</span>
-            </button>
-          </div>
-          <div class="toolbar-section">
-            <h4 class="toolbar-label">灵感参考</h4>
-            <div class="ref-links">
-              <a class="ref-link" href="https://www.pinterest.com/" target="_blank" rel="noopener">
-                <span class="ref-link-icon">
-                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
-                </span>
-                <span class="ref-link-text">
-                  <span class="ref-link-name">Pinterest</span>
-                  <span class="ref-link-desc">色彩板与视觉灵感</span>
-                </span>
-                <span class="ref-link-arrow">→</span>
-              </a>
-              <a class="ref-link" href="https://www.nowness.com/" target="_blank" rel="noopener">
-                <span class="ref-link-icon">
-                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 2h16a2 2 0 012 2v16a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2zm5.5 5L6 12l3.5 5h1.2L7.4 12l3.3-5H9.5zm5 0L11 12l3.5 5h1.2L12.4 12l3.3-5h-1.2z"/></svg>
-                </span>
-                <span class="ref-link-text">
-                  <span class="ref-link-name">Nowness</span>
-                  <span class="ref-link-desc">高端艺术短片调色</span>
-                </span>
-                <span class="ref-link-arrow">→</span>
-              </a>
-              <a class="ref-link" href="https://film-grab.com/" target="_blank" rel="noopener">
-                <span class="ref-link-icon">
-                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
-                </span>
-                <span class="ref-link-text">
-                  <span class="ref-link-name">FilmGrab</span>
-                  <span class="ref-link-desc">经典电影截图数据库</span>
-                </span>
-                <span class="ref-link-arrow">→</span>
-              </a>
-              <a class="ref-link" href="https://www.ysjf.com/material" target="_blank" rel="noopener">
-                <span class="ref-link-icon">
-                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM10 8l5 4-5 4V8z"/></svg>
-                </span>
-                <span class="ref-link-text">
-                  <span class="ref-link-name">影视飓风素材库</span>
-                  <span class="ref-link-desc">视频创作者色彩素材</span>
-                </span>
-                <span class="ref-link-arrow">→</span>
-              </a>
-            </div>
+            <button id="generate-candidates-btn" class="btn-primary btn-full" disabled>生成三种方案 <span>→</span></button>
           </div>
         </div>
+        <div class="rail-note">
+          <span>COLOR IS A RELATIONSHIP</span>
+          <p>我们比较的不是滤镜参数，而是两张画面之间的明度、色相与彩度结构。</p>
+        </div>
       </aside>
-      <section class="canvas-workspace">
+      <section class="canvas-workspace" id="workspace" aria-label="画面工作区">
+        <div class="canvas-hud" aria-hidden="true">
+          <span>IMAGE STAGE / RGB</span>
+          <span class="canvas-hud-center">COLOR MANAGED PREVIEW</span>
+          <span>100 IRE</span>
+        </div>
         <div id="drop-zone">
           <div class="drop-zone-content">
             <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -110,17 +79,50 @@
               <polyline points="17 8 12 3 7 8"/>
               <line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
-            <p>拖拽图片到此处</p>
-            <span class="drop-hint">或点击上传</span>
+            <span class="drop-index">01.A</span>
+            <p>把一张画面<br>放到色彩舞台</p>
+            <span class="drop-hint">DROP IMAGE OR CLICK TO BROWSE</span>
           </div>
         </div>
         <canvas id="split-overlay-canvas"></canvas>
         <canvas id="anatomy-overlay-canvas" aria-hidden="true"></canvas>
         <div id="processing-spinner" class="processing-spinner hidden">
           <div class="spinner-ring"></div>
+          <div class="processing-copy"><strong>正在推演色彩关系</strong><span>FIT / STRUCTURE / RISK</span></div>
+        </div>
+        <div class="canvas-transport">
+          <div class="transport-strength">
+            <div class="transport-heading">
+              <span>TRANSFER STRENGTH</span>
+              <strong id="intensity-value" class="slider-value">100%</strong>
+            </div>
+            <input type="range" id="intensity-slider" min="0" max="100" value="100" aria-label="迁移强度">
+            <div class="slider-labels" aria-hidden="true"><span>ORIGINAL</span><span>REFERENCE</span></div>
+          </div>
+          <button id="btn-toggle-display" class="btn-toggle" disabled>
+            <span class="toggle-mark" aria-hidden="true"></span>
+            <span id="toggle-label">分屏对照</span>
+          </button>
         </div>
       </section>
-      <aside class="panel-right">
+      <aside class="panel-right" id="review-panel" data-workflow-section="review">
+        <div class="panel-heading">
+          <span>02—03 / DECISION DESK</span>
+          <p>先做选择，再拆解颜色为什么发生变化。</p>
+        </div>
+        <details class="reference-drawer" open>
+          <summary>
+            <span><b>01.C</b> 选择参考色</span>
+            <small>REFERENCE LIBRARY</small>
+          </summary>
+          <div class="reference-drawer-body">
+            <h3 class="section-title">内置风格</h3>
+            <div id="builtin-library" class="reference-grid"></div>
+            <h3 class="section-title section-title-spaced">自定义图库</h3>
+            <div id="custom-library" class="reference-grid"></div>
+            <button id="upload-ref-btn" class="btn-secondary btn-full">上传参考图 <span>＋</span></button>
+          </div>
+        </details>
         <div class="panel-mode-tabs" role="tablist" aria-label="右侧分析面板">
           <button class="panel-mode-tab active" type="button" role="tab" aria-selected="true" data-panel-mode="candidates">智能方案</button>
           <button class="panel-mode-tab" type="button" role="tab" aria-selected="false" data-panel-mode="anatomy">色彩解剖 <span>NEW</span></button>
@@ -259,20 +261,14 @@
             </div>
           </div>
         </section>
-        <div class="panel-divider"></div>
-        <h3 class="section-title">内置风格</h3>
-        <div id="builtin-library" class="reference-grid"></div>
-        <h3 class="section-title section-title-spaced">自定义图库</h3>
-        <div id="custom-library" class="reference-grid"></div>
-        <button id="upload-ref-btn" class="btn-secondary btn-full">上传参考图</button>
       </aside>
     </main>
     <footer class="app-footer">
-      <span id="status-text">就绪</span>
-      <span class="footer-feedback">有任何想法欢迎通过邮箱反馈：<a href="mailto:an_missu@163.com">an_missu@163.com</a></span>
+      <div class="footer-status"><i aria-hidden="true"></i><span id="status-text">就绪</span></div>
+      <span class="footer-feedback">COLOR MUSE / EXPLAINABLE COLOR SYSTEM</span>
       <div class="footer-actions">
         <div class="download-dropdown" id="download-dropdown">
-          <button id="btn-download" class="btn-primary" disabled>下载结果</button>
+          <button id="btn-download" class="btn-primary" disabled>导出结果 <span>↓</span></button>
           <div class="download-menu" id="download-menu">
             <div class="download-menu-section">
               <div class="download-menu-label">图片导出</div>
@@ -289,11 +285,11 @@
             <div class="download-menu-section">
               <div class="download-menu-label">LUT 导出</div>
               <button class="download-menu-item" data-action="download-cube" data-requires-lut disabled>
-                <span class="download-menu-icon">🎬</span>
+                <span class="download-menu-icon">LUT</span>
                 <span>下载 .CUBE LUT</span>
               </button>
               <button class="download-menu-item" data-action="download-lr" data-requires-lut disabled>
-                <span class="download-menu-icon">📷</span>
+                <span class="download-menu-icon">XMP</span>
                 <span>导出近似 Lightroom 预设</span>
               </button>
             </div>
