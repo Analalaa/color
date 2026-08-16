@@ -3304,3 +3304,581 @@ input:focus-visible {
     transition-duration: .01ms !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Soft Cinema refinement
+   Keep the editorial interaction model, soften the visual voice.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --bg: #eceae4;
+  --surface: #fbfaf7;
+  --surface-alt: #f1efe9;
+  --border: #d5d1c8;
+  --border-light: rgba(45, 43, 38, 0.1);
+  --text: #25241f;
+  --text-secondary: #77746c;
+  --text-hint: #9d9990;
+  --accent: #657f74;
+  --accent-hover: #4f6c61;
+  --accent-light: rgba(101, 127, 116, 0.09);
+  --accent-medium: rgba(101, 127, 116, 0.17);
+  --acid: #dfe9df;
+  --coral: #bd755f;
+  --ink: #1c1d1a;
+  --paper: #f8f6f1;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --radius-lg: 22px;
+  --shadow: 0 1px 2px rgba(31, 30, 27, 0.04), 0 10px 30px rgba(31, 30, 27, 0.04);
+  --shadow-hover: 0 16px 42px rgba(31, 30, 27, 0.1);
+}
+
+html {
+  background: var(--paper);
+}
+
+body.editorial-lab,
+#app {
+  background: var(--paper);
+}
+
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+input:focus-visible {
+  outline-color: rgba(101, 127, 116, 0.75);
+}
+
+.skip-link {
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Quiet masthead */
+
+.app-header {
+  border-bottom-color: var(--border);
+  background: rgba(248, 246, 241, 0.96);
+}
+
+.brand-code {
+  padding: 4px 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-alt);
+  color: var(--text-secondary);
+}
+
+.app-header .brand-lockup h1 {
+  letter-spacing: -0.055em;
+}
+
+.header-statement {
+  border-left-color: var(--border);
+}
+
+.header-statement > span,
+.header-edition span {
+  color: var(--text-hint);
+}
+
+.header-edition strong {
+  color: var(--accent-hover);
+}
+
+/* Workflow navigation should guide, not shout. */
+
+.app-desc {
+  min-height: 48px;
+  border-bottom-color: var(--border);
+  background: #eae7df;
+}
+
+.workflow-index {
+  gap: 5px;
+  padding: 6px 0;
+}
+
+.workflow-index button,
+.workflow-index button:last-child {
+  border: 0;
+  border-radius: 9px;
+  color: var(--text-secondary);
+}
+
+.workflow-index button:hover {
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--text);
+}
+
+.workflow-index button.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(30, 29, 26, 0.04), 0 5px 16px rgba(30, 29, 26, 0.05);
+}
+
+.workflow-index button.active span {
+  color: var(--accent-hover);
+  opacity: 1;
+}
+
+.app-desc .app-desc-body {
+  color: var(--text-hint);
+}
+
+.focus-mode-btn {
+  min-height: 31px;
+  border-color: rgba(37, 36, 31, 0.2);
+  border-radius: 999px;
+  color: var(--text-secondary);
+}
+
+.focus-mode-btn kbd {
+  border-left-color: rgba(37, 36, 31, 0.15);
+}
+
+.focus-mode-btn:hover,
+.focus-mode-btn[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Softer application surfaces */
+
+.app-main {
+  gap: 1px;
+  background: var(--border);
+}
+
+.toolbar-left,
+.panel-right {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.toolbar-left {
+  background: #f2f0ea;
+}
+
+.rail-heading,
+.panel-heading {
+  border-bottom-color: var(--border);
+}
+
+.toolbar-section + .toolbar-section {
+  border-color: var(--border);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-toggle {
+  border-radius: 10px;
+}
+
+.btn-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 7px 18px rgba(79, 108, 97, 0.14);
+}
+
+.btn-primary:hover:not(:disabled) {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+  box-shadow: 0 9px 24px rgba(79, 108, 97, 0.2);
+}
+
+.btn-secondary {
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent-hover);
+}
+
+.smart-mode-card {
+  border-color: var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.48);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.rail-note {
+  border-top-color: var(--border);
+}
+
+/* The image remains the visual anchor, with gentler framing. */
+
+.canvas-workspace {
+  background:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
+    #20211f;
+  background-size: 56px 56px;
+}
+
+.canvas-workspace::before {
+  background: radial-gradient(circle at 50% 46%, rgba(255,255,255,.055), transparent 46%);
+}
+
+#drop-zone {
+  border-color: rgba(248, 246, 241, 0.22);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.025);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+#drop-zone::before,
+#drop-zone::after {
+  display: none;
+}
+
+#drop-zone:hover,
+#drop-zone.drag-over {
+  border-color: rgba(205, 221, 211, 0.8);
+  background: rgba(205, 221, 211, 0.055);
+}
+
+.drop-icon,
+.drop-index {
+  color: #cddbd2;
+}
+
+#workspace-canvas,
+#split-overlay-canvas,
+#anatomy-overlay-canvas {
+  border-radius: 12px;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.32);
+}
+
+.canvas-transport {
+  border-color: rgba(248, 246, 241, 0.14);
+  border-radius: 16px;
+  background: rgba(34, 35, 32, 0.84);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+}
+
+.transport-heading .slider-value {
+  color: #cddbd2;
+}
+
+.canvas-transport input[type="range"]::-webkit-slider-thumb {
+  border-color: #20211f;
+  background: #d7e2db;
+  box-shadow: 0 0 0 1px rgba(215, 226, 219, 0.8);
+}
+
+.canvas-transport .btn-toggle {
+  border-color: rgba(248, 246, 241, 0.22);
+  border-radius: 10px;
+}
+
+.canvas-transport .btn-toggle:hover:not(:disabled) {
+  border-color: #d7e2db;
+  background: #d7e2db;
+}
+
+.toggle-mark {
+  border-radius: 4px;
+}
+
+.processing-spinner {
+  border-color: rgba(215, 226, 219, 0.4);
+  border-radius: 14px;
+  background: rgba(32, 33, 31, 0.9);
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.25);
+}
+
+.spinner-ring {
+  border-top-color: #cddbd2;
+}
+
+/* Reference library */
+
+.reference-drawer {
+  border-bottom-color: var(--border);
+}
+
+.reference-drawer summary {
+  padding: 0 4px;
+  border-radius: 8px;
+}
+
+.reference-drawer summary:hover {
+  background: var(--surface-alt);
+}
+
+.reference-drawer summary small::after {
+  color: var(--text-secondary);
+}
+
+.ref-thumb {
+  border-radius: 10px;
+}
+
+.ref-thumb:hover {
+  border-color: rgba(101, 127, 116, 0.52);
+  box-shadow: 0 8px 20px rgba(37, 36, 31, 0.1);
+}
+
+.ref-thumb.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px rgba(101, 127, 116, 0.56);
+}
+
+/* The two modes read like a calm segmented control. */
+
+.panel-mode-tabs {
+  gap: 4px;
+  padding: 4px;
+  border-color: transparent;
+  border-radius: 13px;
+  background: var(--surface-alt);
+}
+
+.panel-mode-tab,
+.panel-mode-tab + .panel-mode-tab {
+  border: 0;
+  border-radius: 9px;
+}
+
+.panel-mode-tab.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(37, 36, 31, 0.04), 0 5px 16px rgba(37, 36, 31, 0.06);
+}
+
+/* Candidate cards: fewer outlines, clearer spatial hierarchy. */
+
+.candidate-recommendation {
+  border-color: rgba(101, 127, 116, 0.2);
+  border-radius: 16px;
+  background: #e7eee8;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+#candidate-recommendation-confidence {
+  border-radius: 999px;
+  background: rgba(101, 127, 116, 0.14);
+  color: var(--accent-hover);
+}
+
+.candidate-scene-tags span {
+  border-color: rgba(79, 108, 97, 0.16);
+  border-radius: 999px;
+}
+
+.candidate-empty {
+  border-color: var(--border);
+  border-radius: 14px;
+  background: var(--surface-alt);
+}
+
+.candidate-card {
+  overflow: hidden;
+  border-color: rgba(45, 43, 38, 0.1);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.candidate-card::before {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(248, 246, 241, 0.84);
+  backdrop-filter: blur(8px);
+}
+
+.candidate-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.candidate-card.recommended {
+  border-color: rgba(101, 127, 116, 0.38);
+  box-shadow: 0 0 0 1px rgba(101, 127, 116, 0.12), 0 14px 34px rgba(44, 61, 54, 0.08);
+}
+
+.candidate-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(101, 127, 116, 0.16), 0 16px 38px rgba(44, 61, 54, 0.12);
+}
+
+.candidate-badge {
+  border-radius: 999px;
+  background: var(--accent-light);
+  color: var(--accent-hover);
+}
+
+.candidate-strength {
+  border-color: var(--border-light);
+  border-radius: 9px;
+  background: var(--surface-alt);
+}
+
+.candidate-metric-track,
+.candidate-metric-fill {
+  border-radius: 999px;
+}
+
+.candidate-apply {
+  border-color: var(--accent);
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+}
+
+.candidate-apply:hover {
+  background: var(--accent-hover);
+  color: #fff;
+}
+
+.candidate-card.active .candidate-apply {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+}
+
+.candidate-loading span {
+  border-color: var(--border-light);
+  border-radius: 16px;
+  background: linear-gradient(90deg, #efede7 25%, #f8f7f3 50%, #efede7 75%);
+  background-size: 200% 100%;
+}
+
+/* Color Anatomy: technical, but not clinical. */
+
+.color-anatomy-live {
+  border-color: rgba(101, 127, 116, 0.2);
+  border-radius: 999px;
+  background: var(--accent-light);
+  color: var(--accent-hover);
+}
+
+.color-anatomy-summary {
+  border-left-color: var(--accent);
+  border-radius: 0 12px 12px 0;
+}
+
+.anatomy-source-tabs,
+.component-tabs,
+.scope-tabs {
+  gap: 4px;
+}
+
+.anatomy-source-tabs button,
+.component-tabs button,
+.scope-tabs button,
+.anatomy-source-tabs button + button,
+.component-tabs button + button,
+.scope-tabs button + button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.anatomy-source-tabs button.active,
+.component-tabs button.active,
+.scope-tabs button.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.anatomy-metrics {
+  gap: 6px;
+}
+
+.anatomy-metrics div,
+.anatomy-metrics div + div {
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--surface-alt);
+}
+
+.anatomy-block {
+  border-color: var(--border-light);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.anatomy-block-heading {
+  border-bottom-color: var(--border-light);
+}
+
+.reference-recipe-panel {
+  border-color: rgba(169, 126, 54, 0.2);
+  background: #f7f1e5;
+  box-shadow: 0 12px 34px rgba(118, 91, 45, 0.07);
+}
+
+.recipe-v2-title span,
+.recipe-point-color,
+.color-slice-controls button,
+.waveform-mode-controls button,
+.scope-legend button,
+.color-recipe-layer {
+  border-radius: 9px;
+}
+
+#color-component-map,
+#color-scope-canvas,
+#recipe-tone-curve {
+  border-radius: 11px;
+}
+
+.scope-legend button,
+.recipe-layer-toggle {
+  border-radius: 999px;
+}
+
+.color-recipe-layer {
+  border-left-color: rgba(101, 127, 116, 0.65);
+  background: var(--surface-alt);
+}
+
+/* Output dock */
+
+.app-footer {
+  border-top-color: var(--border);
+  background: var(--surface);
+}
+
+.download-menu {
+  overflow: hidden;
+  border-color: var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 18px 50px rgba(31, 30, 27, 0.15);
+}
+
+.download-menu-item {
+  border-radius: 8px;
+}
+
+.download-menu-item:hover {
+  background: var(--accent-light);
+}
+
+.toast {
+  border-color: rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: #2a2c29;
+  box-shadow: 0 12px 36px rgba(20, 21, 19, 0.22);
+}
+
+::selection {
+  background: rgba(101, 127, 116, 0.32);
+  color: var(--text);
+}
+
+@media (max-width: 920px) {
+  .toolbar-left,
+  .panel-right,
+  #app.focus-mode .toolbar-left,
+  #app.focus-mode .panel-right {
+    border-bottom-color: var(--border);
+  }
+}
