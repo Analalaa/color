@@ -4381,3 +4381,139 @@ input:focus-visible {
     border-bottom-color: var(--border);
   }
 }
+
+/* Chromatic continuity — carry the opening's mist-blue / ember-orange
+   relationship into the working interface. */
+
+:root {
+  --bg: #e9ecea;
+  --surface: #fbfaf7;
+  --surface-alt: #edf0ee;
+  --border: #d0d7d5;
+  --border-light: rgba(38, 53, 59, 0.1);
+  --text: #273238;
+  --text-secondary: #718087;
+  --text-hint: #98a2a5;
+  --accent: #607f8c;
+  --accent-hover: #496b79;
+  --accent-light: rgba(96, 127, 140, 0.1);
+  --accent-medium: rgba(96, 127, 140, 0.18);
+  --acid: #dce6e6;
+  --coral: #bd7048;
+  --ink: #1e3038;
+  --paper: #f7f5f0;
+}
+
+.app-header {
+  background: rgba(247, 245, 240, 0.97);
+}
+
+.brand-code {
+  border-color: #ccd7d8;
+  background: #e4ebeb;
+  color: #55717d;
+}
+
+.header-edition strong,
+.smart-mode-kicker,
+.rail-note > span {
+  color: var(--coral);
+}
+
+.app-desc {
+  background: linear-gradient(90deg, #e3eaeb 0%, #ebe9e3 58%, #f0e2d7 100%);
+}
+
+.workflow-index button.active span {
+  color: var(--coral);
+}
+
+.toolbar-left {
+  background: #edf0ed;
+}
+
+.panel-right {
+  background: #faf9f5;
+}
+
+.canvas-workspace {
+  background:
+    linear-gradient(rgba(209,225,228,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(209,225,228,.02) 1px, transparent 1px),
+    #1d2e36;
+  background-size: 56px 56px;
+}
+
+.canvas-workspace::before {
+  background: radial-gradient(circle at 50% 46%, rgba(157, 183, 190, 0.09), transparent 47%);
+}
+
+#drop-zone {
+  border-color: rgba(203, 220, 223, 0.25);
+  background: rgba(94, 126, 138, 0.035);
+}
+
+#drop-zone:hover,
+#drop-zone.drag-over {
+  border-color: rgba(201, 217, 220, 0.78);
+  background: rgba(96, 127, 140, 0.08);
+}
+
+.drop-icon,
+.drop-index,
+.transport-heading .slider-value {
+  color: #c7d8dc;
+}
+
+.canvas-transport {
+  border-color: rgba(203, 220, 223, 0.16);
+  background: rgba(27, 45, 53, 0.88);
+}
+
+.canvas-transport input[type="range"]::-webkit-slider-thumb {
+  border-color: #1d2e36;
+  background: #dea078;
+  box-shadow: 0 0 0 1px rgba(222, 160, 120, 0.78);
+}
+
+.canvas-transport .btn-toggle:hover:not(:disabled) {
+  border-color: #d4e0e2;
+  background: #d4e0e2;
+}
+
+.candidate-recommendation {
+  border-color: rgba(189, 112, 72, 0.2);
+  background: #f0e1d5;
+}
+
+.candidate-recommendation::before,
+.candidate-score,
+.candidate-insight.has-risk {
+  color: var(--coral);
+}
+
+#candidate-recommendation-confidence {
+  background: rgba(189, 112, 72, 0.12);
+  color: #9f5834;
+}
+
+.candidate-card.recommended {
+  border-color: rgba(189, 112, 72, 0.42);
+  box-shadow: 0 0 0 1px rgba(189, 112, 72, 0.1), 0 14px 34px rgba(117, 65, 39, 0.08);
+}
+
+.candidate-card.recommended .candidate-badge {
+  background: rgba(189, 112, 72, 0.11);
+  color: #9f5834;
+}
+
+.reference-recipe-panel {
+  border-color: rgba(189, 112, 72, 0.18);
+  background: #f5eade;
+  box-shadow: 0 12px 34px rgba(117, 65, 39, 0.06);
+}
+
+.footer-status i {
+  background: var(--coral);
+  box-shadow: 0 0 0 3px rgba(189, 112, 72, 0.1);
+}
