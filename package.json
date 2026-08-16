@@ -1,0 +1,9 @@
+{
+  "name": "color-muse",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-sites.mjs",
+    "test": "node --test"
+  }
+}

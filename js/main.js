@@ -1,5 +1,14 @@
-// EventBus implementation
-class EventBus {
+import { initDB } from './storage.js';
+import { initUpload } from './upload.js';
+import { initCanvasWorkspace } from './canvas-workspace.js';
+import { initReferenceLibrary } from './reference-library.js';
+import { initPreview } from './preview.js';
+import { initDownload } from './download.js';
+import { initSplitCompare } from './split-compare.js';
+import { initCandidateBoard } from './ui/candidate-board.js';
+import { showToast } from './toast.js';
+
+class EventBusImpl {
   constructor() {
     this.listeners = {};
   }
@@ -13,46 +22,65 @@ class EventBus {
   }
   emit(event, data) {
     if (!this.listeners[event]) return;
-    this.listeners[event].forEach(cb => cb(data));
+    this.listeners[event].forEach(cb => {
+      try { cb(data); } catch (err) { console.error(`[EventBus] handler for "${event}" threw:`, err); }
+    });
   }
 }
 
-const eventBus = new EventBus();
-window.EventBus = eventBus;
+export const EventBus = new EventBusImpl();
+window.EventBus = EventBus;
+window.showToast = showToast;
 
-// Initialize toolbar controls
 function initToolbar() {
-  // Algorithm switch handler
-  document.querySelectorAll('input[name="algo"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      EventBus.emit('algo-changed', e.target.value);
-    });
-  });
-
-  // Intensity slider handler
   const intensitySlider = document.getElementById('intensity-slider');
+  const intensityValueEl = document.getElementById('intensity-value');
   if (intensitySlider) {
+    let inputTimer = null;
     intensitySlider.addEventListener('input', (e) => {
       const val = parseInt(e.target.value);
-      // Update displayed value
-      const valEl = document.getElementById('intensity-value');
-      if (valEl) valEl.textContent = val + '%';
-      EventBus.emit('intensity-changed', val / 100);
+      if (intensityValueEl) intensityValueEl.textContent = val + '%';
+      if (inputTimer) clearTimeout(inputTimer);
+      inputTimer = setTimeout(() => {
+        EventBus.emit('intensity-changed', val / 100);
+      }, 120);
     });
   }
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
   try {
-    await initDB();
+    try {
+      await initDB();
+    } catch (storageError) {
+      console.warn('[Color Muse] Custom reference storage unavailable:', storageError);
+    }
     initUpload();
     initCanvasWorkspace();
     await initReferenceLibrary();
+    initCandidateBoard();
     initPreview();
     initDownload();
+    initSplitCompare();
     initToolbar();
     console.log('[Color Muse] initialized');
+
+    // Enable toggle button when transfer completes
+    EventBus.on('transfer-complete', ({ hasOriginal }) => {
+      const toggleBtn = document.getElementById('btn-toggle-display');
+      if (toggleBtn && hasOriginal) {
+        toggleBtn.disabled = false;
+      }
+    });
+
+    EventBus.on('result-invalidated', () => {
+      const toggleBtn = document.getElementById('btn-toggle-display');
+      if (toggleBtn) toggleBtn.disabled = true;
+    });
+
+    // Split compare button is handled by split-compare.js via EventBus
   } catch (err) {
     console.error('[Color Muse] Initialization failed:', err);
+    showToast('初始化失败: ' + err.message);
   }
 });
