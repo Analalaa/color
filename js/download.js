@@ -4,6 +4,7 @@ import { lutToCubeString } from './color-transfer/cube-writer.js';
 import { showToast } from './toast.js';
 import { getCurrentImageName } from './canvas-workspace.js';
 import { cancelFullRender, renderFullCandidate } from './core/candidate-pipeline.js';
+import { getColorAnatomyReport } from './ui/color-anatomy.js';
 
 let batchCounter = 0;
 let batchRunning = false;
@@ -88,6 +89,9 @@ function initDownloadDropdown() {
       case 'download-report':
         downloadAnalysisReport();
         break;
+      case 'download-recipe':
+        downloadColorRecipe();
+        break;
     }
   });
 }
@@ -168,7 +172,7 @@ function downloadAnalysisReport() {
     return;
   }
   const serializable = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     generatedAt: new Date().toISOString(),
     sourceName: getCurrentImageName(),
     sceneProfile: report.sceneProfile,
@@ -176,11 +180,36 @@ function downloadAnalysisReport() {
     candidates: report.candidates.map(({ pixels, ...candidate }) => candidate),
     failures: report.failures,
     timings: report.timings,
-    selection: report.selection
+    selection: report.selection,
+    colorDNA: getColorAnatomyReport()
   };
   const blob = new Blob([JSON.stringify(serializable, null, 2)], { type: 'application/json' });
   triggerDownload(blob, `${safeBaseName(getCurrentImageName())}_color-audit.json`);
   showToast('已下载审色报告');
+}
+
+function downloadColorRecipe() {
+  const anatomy = getColorAnatomyReport();
+  if (!anatomy?.comparison?.recipe?.length) {
+    showToast('当前还没有可导出的 Color Recipe');
+    return;
+  }
+  const recipe = {
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
+    sourceName: getCurrentImageName(),
+    colorSpace: anatomy.colorSpace,
+    engineId: getSelectedEngineId(),
+    intensity: getLastIntensity(),
+    referenceDNA: anatomy.reference,
+    targetDNA: anatomy.result,
+    referenceFitGain: anatomy.comparison.referenceFitGain,
+    layers: anatomy.comparison.recipe,
+    explanations: anatomy.comparison.explanations
+  };
+  const blob = new Blob([JSON.stringify(recipe, null, 2)], { type: 'application/json' });
+  triggerDownload(blob, `${safeBaseName(getCurrentImageName())}_color-recipe.json`);
+  showToast('已下载 Color Recipe');
 }
 
 /**

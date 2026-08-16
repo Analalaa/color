@@ -5,7 +5,8 @@ import {
   cancelCandidateGeneration,
   cancelFullRender,
   generateCandidates,
-  renderFullCandidate
+  renderFullCandidate,
+  resizePixelData
 } from './core/candidate-pipeline.js';
 
 let currentResultPixels = null;
@@ -27,6 +28,7 @@ let originalPixels = null;
 
 export function initPreview() {
   EventBus.on('reference-selection-started', () => {
+    EventBus.emit('color-analysis-reset');
     lastRefData = null;
     lastRefId = null;
     candidateSet = [];
@@ -56,6 +58,7 @@ export function initPreview() {
   });
 
   EventBus.on('canvas-ready', () => {
+    EventBus.emit('color-analysis-reset');
     const current = getCurrentPixels();
     originalPixels = current ? new Uint8ClampedArray(current.data) : null;
     sourceReady = !!current;
@@ -92,6 +95,23 @@ async function handleReferenceSelected({ id, refData }) {
   lastIntensity = intensitySlider ? parseInt(intensitySlider.value, 10) / 100 : 1;
   emitInputState();
   scheduleAutomaticGeneration();
+  emitColorAnalysisState(getSourcePixels());
+}
+
+function emitColorAnalysisState(source, result = null) {
+  if (!source?.data?.length || !lastRefData?.data?.length) return;
+  try {
+    const maxSide = 520;
+    EventBus.emit('color-analysis-state', {
+      source: resizePixelData(source, maxSide),
+      reference: resizePixelData(lastRefData, maxSide),
+      result: result?.data?.length ? resizePixelData(result, maxSide) : null,
+      engineId: selectedEngineId,
+      intensity: lastIntensity
+    });
+  } catch (error) {
+    console.warn('[preview] Color Anatomy analysis skipped:', error);
+  }
 }
 
 function emitInputState() {
@@ -222,6 +242,11 @@ async function applyCandidate(engineId, {
       engineId,
       hasOriginal: !!originalPixels,
       originalPixels
+    });
+    emitColorAnalysisState(source, {
+      data: currentResultPixels,
+      width: source.width,
+      height: source.height
     });
   } catch (error) {
     if (requestId !== renderRequest) return;
