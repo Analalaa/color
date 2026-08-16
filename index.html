@@ -224,10 +224,19 @@
               <button type="button" data-scope-mode="vectorscope">Vectorscope</button>
               <button type="button" data-scope-mode="parade">RGB Parade</button>
             </div>
-            <canvas id="color-scope-canvas" width="296" height="156" aria-label="色彩示波器"></canvas>
-            <div class="scope-legend" aria-hidden="true">
-              <span class="source">原图</span><span class="reference">参考</span><span class="result">结果</span>
+            <div id="waveform-mode-controls" class="waveform-mode-controls" role="tablist" aria-label="Waveform 细节模式">
+              <button type="button" class="active" data-waveform-mode="density">亮度密度</button>
+              <button type="button" data-waveform-mode="rgb">RGB 波形</button>
+              <button type="button" data-waveform-mode="envelope">10–90% 包络</button>
+              <span id="scope-resolution">192 × 128</span>
             </div>
+            <canvas id="color-scope-canvas" width="296" height="220" aria-label="高精度色彩示波器"></canvas>
+            <div class="scope-legend" aria-label="选择要显示的画面状态">
+              <button type="button" class="source active" aria-pressed="true" data-scope-state="source">原图</button>
+              <button type="button" class="reference active" aria-pressed="true" data-scope-state="reference">参考</button>
+              <button type="button" class="result active" aria-pressed="true" data-scope-state="result">结果</button>
+            </div>
+            <p id="scope-detail-help" class="anatomy-help">横轴对应画面位置，纵轴为 0–100 IRE；亮度越集中，轨迹越明亮。</p>
           </div>
 
           <div class="anatomy-block">

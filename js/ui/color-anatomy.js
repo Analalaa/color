@@ -38,6 +38,8 @@ let componentMode = 'lightness';
 let activeSliceId = null;
 let activePointColorId = null;
 let scopeMode = 'waveform';
+let waveformMode = 'density';
+let scopeVisibility = { source: true, reference: true, result: true };
 let engineId = null;
 let intensity = null;
 let referenceRecipe = null;
@@ -111,6 +113,23 @@ function setupControls() {
       renderScope();
     });
   });
+  document.querySelectorAll('[data-waveform-mode]').forEach(button => {
+    button.addEventListener('click', () => {
+      waveformMode = button.dataset.waveformMode;
+      updateControlState();
+      renderScope();
+    });
+  });
+  document.querySelectorAll('[data-scope-state]').forEach(button => {
+    button.addEventListener('click', () => {
+      const key = button.dataset.scopeState;
+      const visibleCount = Object.values(scopeVisibility).filter(Boolean).length;
+      if (scopeVisibility[key] && visibleCount === 1) return;
+      scopeVisibility[key] = !scopeVisibility[key];
+      updateControlState();
+      renderScope();
+    });
+  });
 }
 
 function resetAnatomy() {
@@ -122,6 +141,9 @@ function resetAnatomy() {
   activeSliceId = null;
   activePointColorId = null;
   componentMode = 'lightness';
+  scopeMode = 'waveform';
+  waveformMode = 'density';
+  scopeVisibility = { source: true, reference: true, result: true };
   engineId = null;
   intensity = null;
   referenceRecipe = null;
@@ -223,6 +245,30 @@ function updateControlState() {
   document.querySelectorAll('[data-scope-mode]').forEach(button => {
     button.classList.toggle('active', button.dataset.scopeMode === scopeMode);
   });
+  document.querySelectorAll('[data-waveform-mode]').forEach(button => {
+    button.classList.toggle('active', button.dataset.waveformMode === waveformMode);
+  });
+  document.querySelectorAll('[data-scope-state]').forEach(button => {
+    const key = button.dataset.scopeState;
+    const visible = !!scopeVisibility[key];
+    button.disabled = !scopes[key];
+    button.classList.toggle('active', visible);
+    button.setAttribute('aria-pressed', String(visible));
+  });
+  getElement('waveform-mode-controls')?.classList.toggle('hidden', scopeMode !== 'waveform');
+  const resolution = getElement('scope-resolution');
+  const scope = scopes.result || scopes.reference || scopes.source;
+  if (resolution) resolution.textContent = scope
+    ? `${scope.resolution.xBins} × ${scope.resolution.yBins} · ${scope.sampleCount.toLocaleString()} samples`
+    : '192 × 128';
+  const help = getElement('scope-detail-help');
+  if (help) {
+    if (scopeMode === 'vectorscope') help.textContent = 'Lab a*/b* 密度图；同心圆表示彩度，放射线标记主要色相方向。';
+    else if (scopeMode === 'parade') help.textContent = '真实 RGB 通道波形；每个分栏的横轴仍对应画面位置，而不是普通直方图。';
+    else if (waveformMode === 'rgb') help.textContent = 'RGB 三通道按画面位置叠加；通道分离表示局部色偏，白色区域表示通道接近。';
+    else if (waveformMode === 'envelope') help.textContent = '显示每个横向位置的 10%、中位数与 90% 明度，快速比较动态范围和明暗结构。';
+    else help.textContent = '横轴对应画面位置，纵轴为 0–100 IRE；采用对数密度保留稀疏高光和暗部细节。';
+  }
   document.querySelectorAll('[data-slice-id]').forEach(button => {
     button.classList.toggle('active', button.dataset.sliceId === activeSliceId);
     const slice = dna[activeSource]?.colorSlices?.find(item => item.id === button.dataset.sliceId);
@@ -309,7 +355,7 @@ function prepareScopeCanvas() {
   const canvas = getElement('color-scope-canvas');
   if (!canvas) return null;
   const width = Math.max(260, canvas.clientWidth || 296);
-  const height = 156;
+  const height = 220;
   const ratio = Math.min(2, window.devicePixelRatio || 1);
   canvas.width = Math.round(width * ratio);
   canvas.height = Math.round(height * ratio);
@@ -317,113 +363,255 @@ function prepareScopeCanvas() {
   context.setTransform(ratio, 0, 0, ratio, 0, 0);
   context.fillStyle = '#151817';
   context.fillRect(0, 0, width, height);
-  context.strokeStyle = 'rgba(255,255,255,0.08)';
-  context.lineWidth = 1;
-  for (let i = 1; i < 4; i++) {
-    context.beginPath();
-    context.moveTo(0, height * i / 4);
-    context.lineTo(width, height * i / 4);
-    context.stroke();
-  }
-  return { canvas, context, width, height };
+  return {
+    canvas,
+    context,
+    width,
+    height,
+    plot: { left: 25, top: 9, width: width - 33, height: height - 26, bottom: height - 17 }
+  };
 }
 
 function availableScopeEntries() {
   return [
-    { key: 'source', data: scopes.source, color: '#b9b5ad', alpha: 0.08 },
-    { key: 'reference', data: scopes.reference, color: '#d5aa4d', alpha: 0.1 },
-    { key: 'result', data: scopes.result, color: '#74bea1', alpha: 0.18 }
-  ].filter(entry => entry.data);
+    { key: 'source', data: scopes.source, color: '#b9b5ad', densityAlpha: 0.34, dash: [2, 3] },
+    { key: 'reference', data: scopes.reference, color: '#d5aa4d', densityAlpha: 0.38, dash: [6, 3] },
+    { key: 'result', data: scopes.result, color: '#74bea1', densityAlpha: 0.5, dash: [] }
+  ].filter(entry => entry.data && scopeVisibility[entry.key]);
 }
 
-function renderWaveform(context, width, height) {
-  availableScopeEntries().forEach(entry => {
-    context.fillStyle = entry.color;
-    context.globalAlpha = entry.alpha;
-    const points = entry.data.waveform;
-    const stride = Math.max(1, Math.ceil(points.length / 4500));
-    for (let i = 0; i < points.length; i += stride) {
-      const point = points[i];
-      context.fillRect(point.x * width, (1 - point.l) * (height - 4) + 2, 1.2, 1.2);
+function drawIreGrid(context, plot, { vertical = true } = {}) {
+  context.save();
+  context.font = '7px system-ui, sans-serif';
+  context.textAlign = 'right';
+  context.textBaseline = 'middle';
+  [0, 25, 50, 75, 100].forEach(level => {
+    const y = plot.bottom - level / 100 * plot.height;
+    context.strokeStyle = level === 0 || level === 100
+      ? 'rgba(255,255,255,0.17)'
+      : 'rgba(255,255,255,0.08)';
+    context.beginPath();
+    context.moveTo(plot.left, y);
+    context.lineTo(plot.left + plot.width, y);
+    context.stroke();
+    context.fillStyle = 'rgba(220,225,221,0.46)';
+    context.fillText(String(level), plot.left - 4, y);
+  });
+  if (vertical) {
+    for (let index = 1; index < 4; index++) {
+      const x = plot.left + plot.width * index / 4;
+      context.strokeStyle = 'rgba(255,255,255,0.055)';
+      context.beginPath();
+      context.moveTo(x, plot.top);
+      context.lineTo(x, plot.bottom);
+      context.stroke();
+    }
+  }
+  context.fillStyle = 'rgba(220,225,221,0.33)';
+  context.textAlign = 'left';
+  context.textBaseline = 'alphabetic';
+  context.fillText('IRE', 3, 9);
+  context.restore();
+}
+
+function parseHexColor(hex) {
+  const value = Number.parseInt(hex.replace('#', ''), 16);
+  return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+}
+
+function drawDensityLayer(context, density, xBins, yBins, rect, color, alpha, composite = 'lighter') {
+  if (!density?.length) return;
+  let max = 0;
+  for (const value of density) max = Math.max(max, value);
+  if (!max) return;
+  const [r, g, b] = parseHexColor(color);
+  const offscreen = document.createElement('canvas');
+  offscreen.width = xBins;
+  offscreen.height = yBins;
+  const offscreenContext = offscreen.getContext('2d');
+  const image = offscreenContext.createImageData(xBins, yBins);
+  const logMax = Math.log1p(max);
+  for (let y = 0; y < yBins; y++) {
+    for (let x = 0; x < xBins; x++) {
+      const value = density[y * xBins + x];
+      if (!value) continue;
+      const targetIndex = ((yBins - 1 - y) * xBins + x) * 4;
+      const normalized = Math.log1p(value) / logMax;
+      image.data[targetIndex] = r;
+      image.data[targetIndex + 1] = g;
+      image.data[targetIndex + 2] = b;
+      image.data[targetIndex + 3] = Math.round(255 * alpha * Math.pow(normalized, 0.72));
+    }
+  }
+  offscreenContext.putImageData(image, 0, 0);
+  context.save();
+  context.globalCompositeOperation = composite;
+  context.imageSmoothingEnabled = true;
+  context.drawImage(offscreen, rect.left, rect.top, rect.width, rect.height);
+  context.restore();
+}
+
+function drawEnvelopeLine(context, values, rect, color, width = 1, dash = [], alpha = 1) {
+  if (!values?.length) return;
+  context.save();
+  context.strokeStyle = color;
+  context.lineWidth = width;
+  context.globalAlpha = alpha;
+  context.setLineDash(dash);
+  context.beginPath();
+  let drawing = false;
+  values.forEach((value, index) => {
+    if (value == null) {
+      drawing = false;
+      return;
+    }
+    const x = rect.left + index / Math.max(1, values.length - 1) * rect.width;
+    const y = rect.top + (1 - value) * rect.height;
+    if (!drawing) {
+      context.moveTo(x, y);
+      drawing = true;
+    } else {
+      context.lineTo(x, y);
     }
   });
-  context.globalAlpha = 1;
+  context.stroke();
+  context.restore();
+}
+
+function drawEnvelope(context, envelope, rect, entry, emphasize = true) {
+  if (!envelope) return;
+  context.save();
+  context.fillStyle = entry.color;
+  context.globalAlpha = emphasize ? 0.055 : 0.03;
+  envelope.p10.forEach((low, index) => {
+    const high = envelope.p90[index];
+    if (low == null || high == null) return;
+    const x = rect.left + index / Math.max(1, envelope.p10.length - 1) * rect.width;
+    const top = rect.top + (1 - high) * rect.height;
+    const bottom = rect.top + (1 - low) * rect.height;
+    context.fillRect(x, top, Math.max(1, rect.width / envelope.p10.length + 0.3), Math.max(1, bottom - top));
+  });
+  context.restore();
+  drawEnvelopeLine(context, envelope.p10, rect, entry.color, 0.75, entry.dash, 0.34);
+  drawEnvelopeLine(context, envelope.p90, rect, entry.color, 0.75, entry.dash, 0.34);
+  drawEnvelopeLine(context, envelope.median, rect, entry.color, emphasize ? 1.55 : 1.05, entry.dash, 0.94);
+}
+
+function renderWaveform(context, plot) {
+  drawIreGrid(context, plot);
+  const entries = availableScopeEntries();
+  if (waveformMode === 'envelope') {
+    entries.forEach(entry => drawEnvelope(context, entry.data.waveformEnvelope, plot, entry, true));
+    return;
+  }
+  entries.forEach(entry => {
+    const { xBins, yBins } = entry.data.resolution;
+    if (waveformMode === 'rgb') {
+      const colors = ['#f0625f', '#65c987', '#668fe0'];
+      entry.data.rgbWaveformDensity.forEach((density, channel) => {
+        drawDensityLayer(context, density, xBins, yBins, plot, colors[channel], entry.densityAlpha * 0.68);
+      });
+    } else {
+      drawDensityLayer(context, entry.data.waveformDensity, xBins, yBins, plot, entry.color, entry.densityAlpha);
+    }
+    drawEnvelopeLine(context, entry.data.waveformEnvelope.median, plot, entry.color, 1.3, entry.dash, 0.92);
+  });
 }
 
 function renderVectorscope(context, width, height) {
-  const radius = Math.min(width, height) * 0.4;
+  const radius = Math.min(width - 42, height - 18) * 0.46;
   const centerX = width / 2;
   const centerY = height / 2;
-  context.strokeStyle = 'rgba(255,255,255,0.18)';
-  context.beginPath();
-  context.arc(centerX, centerY, radius, 0, Math.PI * 2);
-  context.stroke();
-  COLOR_SLICES.forEach(slice => {
-    const angle = slice.center * Math.PI / 180;
-    context.strokeStyle = `${slice.color}55`;
+  context.save();
+  [0.25, 0.5, 0.75, 1].forEach((ratio, index) => {
+    context.strokeStyle = index === 3 ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.07)';
     context.beginPath();
-    context.moveTo(centerX, centerY);
-    context.lineTo(centerX + Math.cos(angle) * radius, centerY - Math.sin(angle) * radius);
+    context.arc(centerX, centerY, radius * ratio, 0, Math.PI * 2);
     context.stroke();
   });
-  availableScopeEntries().forEach(entry => {
-    context.fillStyle = entry.color;
-    context.globalAlpha = entry.alpha + 0.05;
-    const points = entry.data.vectorscope;
-    const stride = Math.max(1, Math.ceil(points.length / 4000));
-    for (let i = 0; i < points.length; i += stride) {
-      const point = points[i];
-      const x = centerX + point.a / 128 * radius;
-      const y = centerY - point.b / 128 * radius;
-      context.fillRect(x, y, 1.2, 1.2);
-    }
-  });
-  context.globalAlpha = 1;
-}
-
-function drawHistogramLine(context, histogram, x, width, height, color, alpha, dashed) {
-  const max = Math.max(...histogram, 0.001);
-  context.strokeStyle = color;
-  context.globalAlpha = alpha;
-  context.setLineDash(dashed ? [3, 3] : []);
+  context.strokeStyle = 'rgba(255,255,255,0.08)';
   context.beginPath();
-  histogram.forEach((value, index) => {
-    const px = x + index / Math.max(1, histogram.length - 1) * width;
-    const py = height - 6 - value / max * (height - 18);
-    if (index === 0) context.moveTo(px, py);
-    else context.lineTo(px, py);
-  });
+  context.moveTo(centerX - radius, centerY);
+  context.lineTo(centerX + radius, centerY);
+  context.moveTo(centerX, centerY - radius);
+  context.lineTo(centerX, centerY + radius);
   context.stroke();
-  context.setLineDash([]);
-  context.globalAlpha = 1;
+  context.font = '7px system-ui, sans-serif';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  COLOR_SLICES.forEach(slice => {
+    const angle = slice.center * Math.PI / 180;
+    const targetX = centerX + Math.cos(angle) * radius;
+    const targetY = centerY - Math.sin(angle) * radius;
+    context.strokeStyle = `${slice.color}48`;
+    context.beginPath();
+    context.moveTo(centerX, centerY);
+    context.lineTo(targetX, targetY);
+    context.stroke();
+    context.fillStyle = slice.color;
+    context.globalAlpha = 0.78;
+    context.fillText(slice.label, centerX + Math.cos(angle) * (radius + 8), centerY - Math.sin(angle) * (radius + 8));
+  });
+  context.restore();
+  const rect = { left: centerX - radius, top: centerY - radius, width: radius * 2, height: radius * 2 };
+  availableScopeEntries().forEach(entry => {
+    const bins = entry.data.resolution.vectorBins;
+    drawDensityLayer(context, entry.data.vectorscopeDensity, bins, bins, rect, entry.color, entry.densityAlpha * 0.9);
+  });
 }
 
-function renderParade(context, width, height) {
-  const channelColors = ['#ef6a62', '#70c68a', '#6d91d7'];
-  const segmentWidth = width / 3;
-  availableScopeEntries().forEach(entry => {
-    entry.data.rgbHistograms.forEach((histogram, channel) => {
-      drawHistogramLine(
+function renderParade(context, plot) {
+  drawIreGrid(context, plot, { vertical: false });
+  const channelColors = ['#ef625f', '#65c987', '#668fe0'];
+  const channelLabels = ['R', 'G', 'B'];
+  const gap = 5;
+  const segmentWidth = (plot.width - gap * 2) / 3;
+  channelColors.forEach((channelColor, channel) => {
+    const left = plot.left + channel * (segmentWidth + gap);
+    const rect = { left, top: plot.top, width: segmentWidth, height: plot.height };
+    context.fillStyle = channelColor;
+    context.globalAlpha = 0.82;
+    context.font = '700 8px system-ui, sans-serif';
+    context.fillText(channelLabels[channel], left + 3, plot.top + 10);
+    context.globalAlpha = 1;
+    availableScopeEntries().forEach(entry => {
+      const { xBins, yBins } = entry.data.resolution;
+      drawDensityLayer(
         context,
-        histogram,
-        channel * segmentWidth + 6,
-        segmentWidth - 12,
-        height,
-        channelColors[channel],
-        entry.key === 'result' ? 0.95 : entry.key === 'reference' ? 0.42 : 0.25,
-        entry.key !== 'result'
+        entry.data.rgbWaveformDensity[channel],
+        xBins,
+        yBins,
+        rect,
+        channelColor,
+        entry.densityAlpha * 0.72
+      );
+      drawEnvelopeLine(
+        context,
+        entry.data.rgbWaveformEnvelopes[channel].median,
+        rect,
+        entry.color,
+        1.05,
+        entry.dash,
+        0.92
       );
     });
+    if (channel < 2) {
+      context.strokeStyle = 'rgba(255,255,255,0.1)';
+      context.beginPath();
+      context.moveTo(left + segmentWidth + gap / 2, plot.top);
+      context.lineTo(left + segmentWidth + gap / 2, plot.bottom);
+      context.stroke();
+    }
   });
 }
 
 function renderScope() {
   const prepared = prepareScopeCanvas();
   if (!prepared) return;
-  const { context, width, height } = prepared;
+  const { context, width, height, plot } = prepared;
   if (scopeMode === 'vectorscope') renderVectorscope(context, width, height);
-  else if (scopeMode === 'parade') renderParade(context, width, height);
-  else renderWaveform(context, width, height);
+  else if (scopeMode === 'parade') renderParade(context, plot);
+  else renderWaveform(context, plot);
 }
 
 function prepareRecipeCurveCanvas() {

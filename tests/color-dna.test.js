@@ -70,9 +70,19 @@ test('scope and color-slice summaries are serializable and bounded', () => {
     [180, 65, 50], [195, 70, 55],
     [35, 110, 205], [45, 125, 220]
   ]);
-  const scope = buildScopeData({ data: sourcePixels, width: 2, height: 2 });
+  const scope = buildScopeData(
+    { data: sourcePixels, width: 2, height: 2 },
+    { xBins: 8, yBins: 8, vectorBins: 8 }
+  );
+  assert.equal(scope.schemaVersion, 2);
   assert.equal(scope.waveform.length, 4);
   assert.equal(scope.vectorscope.length, 4);
+  assert.equal(scope.waveformDensity.length, 64);
+  assert.equal(scope.waveformDensity.reduce((a, b) => a + b, 0), scope.sampleCount);
+  assert.ok(scope.rgbWaveformDensity.every(density => density.reduce((a, b) => a + b, 0) === scope.sampleCount));
+  assert.equal(scope.vectorscopeDensity.reduce((a, b) => a + b, 0), scope.sampleCount);
+  assert.equal(scope.waveformEnvelope.median.length, 8);
+  assert.ok(scope.waveformEnvelope.median.every(value => value == null || (value >= 0 && value <= 1)));
   assert.ok(scope.rgbHistograms.every(histogram => Math.abs(histogram.reduce((a, b) => a + b, 0) - 1) < 1e-8));
 
   const source = analyzeColorDNA(sourcePixels);

@@ -10,6 +10,7 @@ Color Muse 是一个纯浏览器端运行的参考图审色工具。它不会要
 - 检查 Lab 分布贴合、局部层次、明暗余量、中性色漂移和过饱和风险
 - 输出推荐方案、建议强度、四维分数、置信度和审色依据
 - Color Anatomy 色彩解剖：L* / C* / H° / RGB 分量图、六色切片定位与原图/参考/结果三态 Scopes
+- 高精度 Scopes：192×128 对数密度 Waveform、亮度/RGB/10–90% 包络模式、0–100 IRE 标尺、三态独立显隐、Lab 密度 Vectorscope 与真实空间 RGB Parade
 - Reference Recipe Engine V2：将参考还原真实拆成白平衡、单调色调曲线、动态 Point Color、三段式色轮和保护区域
 - 曲线叠加原图/参考/结果明度分布；Point Color 支持 Visualize Range，实际参数层支持单独开关和 Fit 增益解释
 - 支持导出可重新渲染的 Reference Recipe V2 JSON；其他方案仍提供结果反推 Color Recipe

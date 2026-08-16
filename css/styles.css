@@ -1041,8 +1041,38 @@ input[type="range"]::-moz-range-thumb {
 }
 
 #color-scope-canvas {
-  height: 156px;
+  height: 220px;
   background: #151817;
+}
+
+.waveform-mode-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.waveform-mode-controls button {
+  min-width: 0;
+  padding: 5px 3px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  background: #232725;
+  color: #989e9a;
+  cursor: pointer;
+  font: 600 7px var(--font-ui);
+}
+
+.waveform-mode-controls button.active {
+  border-color: rgba(116, 190, 161, 0.45);
+  background: #2d3833;
+  color: #b8dbc9;
+}
+
+.waveform-mode-controls > span {
+  grid-column: 1 / -1;
+  color: var(--text-hint);
+  font-size: 7px;
+  text-align: right;
 }
 
 .reference-recipe-panel {
@@ -1215,12 +1245,30 @@ input[type="range"]::-moz-range-thumb {
 .scope-legend {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  color: var(--text-hint);
-  font-size: 7px;
+  gap: 5px;
 }
 
-.scope-legend span::before {
+.scope-legend button {
+  padding: 4px 7px;
+  border: 1px solid var(--border-light);
+  border-radius: 100px;
+  background: var(--surface);
+  color: var(--text-hint);
+  cursor: pointer;
+  font: 600 7px var(--font-ui);
+  opacity: 0.42;
+}
+
+.scope-legend button.active {
+  opacity: 1;
+}
+
+.scope-legend button:disabled {
+  cursor: not-allowed;
+  opacity: 0.22;
+}
+
+.scope-legend button::before {
   display: inline-block;
   width: 6px;
   height: 6px;
