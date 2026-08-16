@@ -8,8 +8,8 @@ let isReady = false;
 let isGenerating = false;
 
 const CONFIDENCE_LABELS = {
-  high: '高置信度',
-  medium: '中等置信度',
+  high: '置信度高',
+  medium: '置信度中',
   low: '结果接近'
 };
 
@@ -52,11 +52,10 @@ function pixelsToDataUrl(pixels, width, height) {
 }
 
 function qualitativeLabel(candidate) {
-  if (isGenerating) return '分析完成';
-  if (candidate.rank === 1) return recommendation?.confidence === 'low' ? '倾向推荐' : '智能推荐';
-  if (!candidate.risks.length) return '稳定备选';
-  if (candidate.riskLevel === 'high') return '谨慎尝试';
-  return '风格备选';
+  if (isGenerating) return '完成';
+  if (candidate.rank === 1) return recommendation?.confidence === 'low' ? '倾向' : '推荐';
+  if (candidate.riskLevel === 'high') return '谨慎';
+  return '备选';
 }
 
 function createMetricRow(key, value) {
@@ -81,7 +80,7 @@ function createDetails(candidate) {
   const details = document.createElement('details');
   details.className = 'candidate-evidence';
   const summary = document.createElement('summary');
-  summary.textContent = '查看审色依据';
+  summary.textContent = '依据';
   const list = document.createElement('ul');
   const hardRiskSet = new Set(candidate.hardRisks || []);
   const evidence = [
@@ -90,7 +89,7 @@ function createDetails(candidate) {
     ...candidate.risks.filter(text => !hardRiskSet.has(text)).map(text => `检查：${text}`)
   ];
   if (!candidate.risks.length) evidence.push('检查：未发现明显曝光或偏色风险');
-  evidence.slice(0, 5).forEach(text => {
+  evidence.slice(0, 3).forEach(text => {
     const item = document.createElement('li');
     item.textContent = text;
     list.append(item);
@@ -125,17 +124,13 @@ function createCandidateCard(candidate) {
   titleGroup.append(title, badge);
   const score = document.createElement('span');
   score.className = 'candidate-score';
-  score.innerHTML = `<strong>${candidate.score}</strong><small>综合</small>`;
+  score.innerHTML = `<strong>${candidate.score}</strong><small>分</small>`;
   heading.append(titleGroup, score);
-
-  const detail = document.createElement('p');
-  detail.className = 'candidate-detail';
-  detail.textContent = candidate.detail;
 
   const strength = document.createElement('div');
   strength.className = 'candidate-strength';
   const suggestedPercent = Math.round(candidate.suggestedIntensity * 100);
-  strength.innerHTML = `<span>Agent 建议强度</span><strong>${suggestedPercent}%</strong>`;
+  strength.innerHTML = `<span>建议强度</span><strong>${suggestedPercent}%</strong>`;
   const currentStrength = document.createElement('span');
   currentStrength.className = 'candidate-current-strength';
   strength.append(currentStrength);
@@ -149,24 +144,22 @@ function createCandidateCard(candidate) {
   const insight = document.createElement('p');
   insight.className = `candidate-insight ${candidate.risks.length ? 'has-risk' : ''}`;
   const primaryRisk = candidate.hardRisks?.[0] || candidate.risks[0];
-  insight.textContent = primaryRisk
-    ? `${candidate.hardRisks?.length ? '重点检查' : '检查'}：${primaryRisk}`
-    : `优势：${candidate.strengths[0]}`;
+  insight.textContent = primaryRisk ? `留意：${primaryRisk}` : '';
 
   const actions = document.createElement('div');
   actions.className = 'candidate-actions';
-  const meta = document.createElement('span');
-  meta.textContent = candidate.exportable ? '支持 LUT / XMP' : '仅图片效果';
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'candidate-apply';
-  button.textContent = candidate.engineId === activeEngineId ? '已采用' : '采用此方案';
+  button.textContent = candidate.engineId === activeEngineId ? '已采用' : '采用';
   button.disabled = isGenerating;
   button.addEventListener('click', () => {
     EventBus.emit('candidate-selection-requested', { engineId: candidate.engineId });
   });
-  actions.append(meta, button);
-  content.append(heading, detail, strength, metrics, insight, createDetails(candidate), actions);
+  actions.append(button);
+  content.append(heading, strength, metrics);
+  if (primaryRisk) content.append(insight);
+  content.append(createDetails(candidate), actions);
   card.append(image, content);
   return card;
 }
@@ -189,12 +182,12 @@ function renderRecommendation() {
     summaryConfidence.dataset.level = recommendation.confidence;
   }
   if (summaryReason) {
-    const reason = recommendation.reasons.join('，');
-    const caution = recommendation.cautions[0] ? `；仍需留意${recommendation.cautions[0]}` : '';
-    summaryReason.textContent = `${reason}${caution}。建议从 ${Math.round(winner.suggestedIntensity * 100)}% 强度开始。`;
+    const reason = recommendation.reasons[0] || '综合表现更稳定';
+    const caution = recommendation.cautions[0] ? `；留意${recommendation.cautions[0]}` : '';
+    summaryReason.textContent = `${reason}${caution} · ${Math.round(winner.suggestedIntensity * 100)}%`;
   }
   if (sceneTags) {
-    sceneTags.replaceChildren(...(sceneProfile?.flags || []).map(flag => {
+    sceneTags.replaceChildren(...(sceneProfile?.flags || []).slice(0, 2).map(flag => {
       const tag = document.createElement('span');
       tag.textContent = SCENE_FLAG_LABELS[flag] || flag;
       return tag;
@@ -222,7 +215,7 @@ function updateActiveState({
     const button = card.querySelector('.candidate-apply');
     if (button) {
       button.disabled = active && rendering;
-      button.textContent = active ? (rendering ? '正在应用…' : '已采用') : '采用此方案';
+      button.textContent = active ? (rendering ? '应用中…' : '已采用') : '采用';
     }
     const manualLabel = card.querySelector('.candidate-current-strength');
     if (manualLabel) {
@@ -252,7 +245,8 @@ export function initCandidateBoard() {
     isGenerating = false;
     isGenerating = true;
     summary?.classList.add('hidden');
-    if (board) board.innerHTML = '<p class="candidate-empty">三种候选会显示在这里</p>';
+    status?.classList.remove('hidden');
+    if (board) board.replaceChildren();
   };
   EventBus.on('reference-selection-started', resetBoard);
   EventBus.on('canvas-ready', resetBoard);
@@ -262,7 +256,8 @@ export function initCandidateBoard() {
     if (generateButton) generateButton.disabled = !ready;
     if (regenerateButton) regenerateButton.disabled = !ready;
     if (!ready && status) {
-      status.textContent = sourceReady ? '再选择一张参考图，即可生成三种方案' : referenceReady ? '再上传一张原图，即可生成三种方案' : '上传原图并选择参考图后自动生成';
+      status.classList.remove('hidden');
+      status.textContent = sourceReady ? '请选择参考图' : referenceReady ? '请选择原图' : '等待原图和参考图';
       summary?.classList.add('hidden');
     }
   });
@@ -272,7 +267,10 @@ export function initCandidateBoard() {
     recommendation = null;
     sceneProfile = null;
     activeEngineId = null;
-    if (status) status.textContent = '正在比较色调贴合、层次、风险与最佳强度…';
+    if (status) {
+      status.classList.remove('hidden');
+      status.textContent = '正在分析…';
+    }
     if (board) board.innerHTML = '<div class="candidate-loading"><span></span><span></span><span></span></div>';
     summary?.classList.add('hidden');
     if (generateButton) generateButton.disabled = true;
@@ -286,7 +284,10 @@ export function initCandidateBoard() {
       else candidates.push(payload.candidate);
       if (board) board.replaceChildren(...candidates.map(createCandidateCard));
     }
-    if (status) status.textContent = `多强度审色进度 ${payload.completed}/${payload.total}`;
+    if (status) {
+      status.classList.remove('hidden');
+      status.textContent = `分析 ${payload.completed}/${payload.total}`;
+    }
   });
 
   EventBus.on('candidates-ready', payload => {
@@ -294,8 +295,10 @@ export function initCandidateBoard() {
     candidates = payload.candidates;
     recommendation = payload.recommendation;
     sceneProfile = payload.sceneProfile;
-    const failureText = payload.failures?.length ? `，${payload.failures.length} 条路径未完成` : '';
-    if (status) status.textContent = `已完成场景画像与多强度比较${failureText}`;
+    if (status) {
+      status.textContent = payload.failures?.length ? `${payload.failures.length} 项未完成` : '';
+      status.classList.toggle('hidden', !payload.failures?.length);
+    }
     if (generateButton) generateButton.disabled = false;
     if (regenerateButton) regenerateButton.disabled = false;
     renderBoard();
@@ -309,14 +312,17 @@ export function initCandidateBoard() {
     const button = card?.querySelector('.candidate-apply');
     if (button) {
       button.disabled = false;
-      button.textContent = '重试应用';
+      button.textContent = '重试';
     }
   });
 
   EventBus.on('candidate-generation-error', ({ message }) => {
     isGenerating = false;
-    if (status) status.textContent = message;
-    if (board) board.innerHTML = '<p class="candidate-empty">暂时无法生成方案，请重试</p>';
+    if (status) {
+      status.classList.remove('hidden');
+      status.textContent = message || '生成失败，请重试';
+    }
+    if (board) board.replaceChildren();
     summary?.classList.add('hidden');
     if (generateButton) generateButton.disabled = !isReady;
     if (regenerateButton) regenerateButton.disabled = !isReady;

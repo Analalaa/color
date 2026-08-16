@@ -66,64 +66,40 @@
   <div id="app">
     <header class="app-header">
       <a class="brand-lockup" href="#" aria-label="Color Muse 首页">
-        <span class="brand-code">CM—26</span>
         <h1><span>Color</span> <em>Muse</em></h1>
       </a>
-      <div class="header-statement">
-        <span>Intelligent color direction</span>
-        <p>把参考色，变成能看懂、能调整、能复用的决定。</p>
-      </div>
-      <div class="header-edition">
-        <span>REFERENCE RECIPE</span>
-        <strong>V2 / BETA</strong>
-        <button id="reopen-intro-btn" type="button">OPENING ↗</button>
+      <div class="header-actions">
+        <button id="reopen-intro-btn" type="button">引导 ↗</button>
       </div>
     </header>
     <div class="app-desc">
       <div class="workflow-index" aria-label="核心工作流">
-        <button type="button" data-workflow-target="input"><span>01</span> INPUT / 输入</button>
-        <button type="button" data-workflow-target="review"><span>02</span> REVIEW / 审色</button>
-        <button type="button" data-workflow-target="recipe"><span>03</span> RECIPE / 拆解</button>
+        <button type="button" data-workflow-target="input"><span>1</span> 导入</button>
+        <button type="button" data-workflow-target="review"><span>2</span> 方案</button>
+        <button type="button" data-workflow-target="recipe"><span>3</span> 解析</button>
       </div>
-      <p class="app-desc-body">Three directions. One reasoned choice. Every adjustment stays visible.</p>
       <button id="focus-mode-btn" class="focus-mode-btn" type="button" aria-pressed="false">
-        <span>专注画面</span><kbd>F</kbd>
+        <span>画面</span><kbd>F</kbd>
       </button>
     </div>
     <main class="app-main">
       <aside class="toolbar-left" id="input-panel" data-workflow-section="input">
         <div class="rail-heading">
-          <span>01 / INPUT</span>
-          <strong>建立色彩关系</strong>
-          <p>先放入你的画面，再选择一张希望接近的参考。</p>
+          <strong>导入</strong>
         </div>
         <div class="toolbar-top">
           <div class="toolbar-section">
-            <h4 class="toolbar-label"><span>01.A</span> 原始画面</h4>
+            <h4 class="toolbar-label">原图</h4>
             <button id="upload-btn" class="btn-primary btn-full">选择原图 <span>↗</span></button>
-            <button id="sample-btn" class="btn-text btn-full" type="button">没有素材？载入完整演示</button>
+            <button id="sample-btn" class="btn-text btn-full" type="button">载入示例</button>
           </div>
           <div class="toolbar-section">
-            <h4 class="toolbar-label"><span>01.B</span> 生成方向</h4>
-            <div class="smart-mode-card">
-              <span class="smart-mode-kicker">COLOR AGENT / 03 PATHS</span>
-              <strong>让算法先提出三种意见</strong>
-              <p>比较贴合、层次、中性色与溢色风险，再给出有依据的推荐。</p>
-            </div>
-            <button id="generate-candidates-btn" class="btn-primary btn-full" disabled>生成三种方案 <span>→</span></button>
+            <h4 class="toolbar-label">方案</h4>
+            <button id="generate-candidates-btn" class="btn-primary btn-full" disabled>生成方案 <span>→</span></button>
           </div>
-        </div>
-        <div class="rail-note">
-          <span>COLOR IS A RELATIONSHIP</span>
-          <p>我们比较的不是滤镜参数，而是两张画面之间的明度、色相与彩度结构。</p>
         </div>
       </aside>
       <section class="canvas-workspace" id="workspace" aria-label="画面工作区">
-        <div class="canvas-hud" aria-hidden="true">
-          <span>IMAGE STAGE / RGB</span>
-          <span class="canvas-hud-center">COLOR MANAGED PREVIEW</span>
-          <span>100 IRE</span>
-        </div>
         <div id="drop-zone">
           <div class="drop-zone-content">
             <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -131,60 +107,53 @@
               <polyline points="17 8 12 3 7 8"/>
               <line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
-            <span class="drop-index">01.A</span>
-            <p>把一张画面<br>放到色彩舞台</p>
-            <span class="drop-hint">DROP IMAGE OR CLICK TO BROWSE</span>
+            <p>导入原图</p>
+            <span class="drop-hint">拖放或点击选择</span>
           </div>
         </div>
         <canvas id="split-overlay-canvas"></canvas>
         <canvas id="anatomy-overlay-canvas" aria-hidden="true"></canvas>
         <div id="processing-spinner" class="processing-spinner hidden">
           <div class="spinner-ring"></div>
-          <div class="processing-copy"><strong>正在推演色彩关系</strong><span>FIT / STRUCTURE / RISK</span></div>
+          <div class="processing-copy"><strong>正在分析…</strong></div>
         </div>
         <div class="canvas-transport">
           <div class="transport-strength">
             <div class="transport-heading">
-              <span>TRANSFER STRENGTH</span>
+              <span>强度</span>
               <strong id="intensity-value" class="slider-value">100%</strong>
             </div>
             <input type="range" id="intensity-slider" min="0" max="100" value="100" aria-label="迁移强度">
-            <div class="slider-labels" aria-hidden="true"><span>ORIGINAL</span><span>REFERENCE</span></div>
+            <div class="slider-labels" aria-hidden="true"><span>原图</span><span>效果</span></div>
           </div>
           <button id="btn-toggle-display" class="btn-toggle" disabled>
             <span class="toggle-mark" aria-hidden="true"></span>
-            <span id="toggle-label">分屏对照</span>
+            <span id="toggle-label">对照</span>
           </button>
         </div>
       </section>
       <aside class="panel-right" id="review-panel" data-workflow-section="review">
-        <div class="panel-heading">
-          <span>02—03 / DECISION DESK</span>
-          <p>先做选择，再拆解颜色为什么发生变化。</p>
-        </div>
         <details class="reference-drawer" open>
           <summary>
-            <span><b>01.C</b> 选择参考色</span>
-            <small>REFERENCE LIBRARY</small>
+            <span>参考图</span>
           </summary>
           <div class="reference-drawer-body">
-            <h3 class="section-title">内置风格</h3>
+            <h3 class="section-title">风格</h3>
             <div id="builtin-library" class="reference-grid"></div>
-            <h3 class="section-title section-title-spaced">自定义图库</h3>
+            <h3 class="section-title section-title-spaced">自定义</h3>
             <div id="custom-library" class="reference-grid"></div>
-            <button id="upload-ref-btn" class="btn-secondary btn-full">上传参考图 <span>＋</span></button>
+            <button id="upload-ref-btn" class="btn-secondary btn-full">添加参考图 <span>＋</span></button>
           </div>
         </details>
         <div class="panel-mode-tabs" role="tablist" aria-label="右侧分析面板">
-          <button class="panel-mode-tab active" type="button" role="tab" aria-selected="true" data-panel-mode="candidates">智能方案</button>
-          <button class="panel-mode-tab" type="button" role="tab" aria-selected="false" data-panel-mode="anatomy">色彩解剖 <span>NEW</span></button>
+          <button class="panel-mode-tab active" type="button" role="tab" aria-selected="true" data-panel-mode="candidates">方案</button>
+          <button class="panel-mode-tab" type="button" role="tab" aria-selected="false" data-panel-mode="anatomy">解析</button>
         </div>
         <section id="candidate-panel" class="candidate-section panel-mode-content">
           <div class="candidate-section-heading">
-            <h3 class="section-title">智能方案</h3>
-            <button id="regenerate-candidates-btn" class="candidate-refresh" type="button" disabled>重新比较</button>
+            <button id="regenerate-candidates-btn" class="candidate-refresh" type="button" disabled>重算</button>
           </div>
-          <p id="candidate-status" class="candidate-status">上传原图并选择参考图后自动生成</p>
+          <p id="candidate-status" class="candidate-status">等待原图和参考图</p>
           <div id="candidate-recommendation" class="candidate-recommendation hidden" aria-live="polite">
             <div class="candidate-recommendation-heading">
               <strong id="candidate-recommendation-title"></strong>
@@ -193,19 +162,13 @@
             <p id="candidate-recommendation-reason"></p>
             <div id="candidate-scene-tags" class="candidate-scene-tags"></div>
           </div>
-          <div id="candidate-board" class="candidate-board">
-            <p class="candidate-empty">三种候选会显示在这里</p>
-          </div>
+          <div id="candidate-board" class="candidate-board"></div>
         </section>
         <section id="color-anatomy-panel" class="color-anatomy panel-mode-content hidden" aria-live="polite">
           <div class="color-anatomy-heading">
-            <div>
-              <span class="color-anatomy-kicker">COLOR ANATOMY</span>
-              <h3>Color DNA 色彩解剖</h3>
-            </div>
-            <span id="color-anatomy-live" class="color-anatomy-live">等待画面</span>
+            <h3>色彩解析</h3>
           </div>
-          <p id="color-anatomy-summary" class="color-anatomy-summary">完成智能审色后，这里会解释颜色发生了什么变化。</p>
+          <p id="color-anatomy-summary" class="color-anatomy-summary">等待结果</p>
 
           <div class="anatomy-source-tabs" role="tablist" aria-label="分析对象">
             <button type="button" data-anatomy-source="source">原图</button>
@@ -222,10 +185,10 @@
 
           <div id="reference-recipe-panel" class="anatomy-block reference-recipe-panel hidden">
             <div class="anatomy-block-heading">
-              <div class="recipe-v2-title"><strong>Reference Recipe</strong><span>V2 · 实算参数</span></div>
+              <div class="recipe-v2-title"><strong>Reference Recipe</strong></div>
               <span id="recipe-layer-count">0 层</span>
             </div>
-            <p id="reference-recipe-status" class="anatomy-help">参考还原方案会在这里显示真正参与渲染的参数。</p>
+            <p id="reference-recipe-status" class="anatomy-help">选择“参考还原”后显示</p>
             <div class="recipe-curve-heading">
               <strong>参考色调曲线</strong>
               <span>输入 L* → 输出 L*</span>
@@ -236,7 +199,7 @@
             </div>
             <div class="recipe-point-heading">
               <strong>Point Color</strong>
-              <span>点击可视化范围</span>
+              <span>选择颜色</span>
             </div>
             <div id="recipe-point-colors" class="recipe-point-colors"></div>
             <p id="recipe-point-explanation" class="anatomy-help">每个颜色范围都有独立的色相、彩度、明度参数。</p>
@@ -256,7 +219,6 @@
               <button type="button" data-component-mode="blue">B</button>
             </div>
             <canvas id="color-component-map" width="296" height="148" aria-label="颜色分量图"></canvas>
-            <p id="component-map-help" class="anatomy-help">越亮代表该位置的感知明度越高。</p>
           </div>
 
           <div class="anatomy-block">
@@ -290,13 +252,11 @@
               <button type="button" class="reference active" aria-pressed="true" data-scope-state="reference">参考</button>
               <button type="button" class="result active" aria-pressed="true" data-scope-state="result">结果</button>
             </div>
-            <p id="scope-detail-help" class="anatomy-help">横轴对应画面位置，纵轴为 0–100 IRE；亮度越集中，轨迹越明亮。</p>
           </div>
 
           <div class="anatomy-block">
             <div class="anatomy-block-heading">
-              <strong>Agent 解释</strong>
-              <span id="anatomy-engine-label">实时</span>
+              <strong>解释</strong>
             </div>
             <ul id="color-explanation-list" class="color-explanation-list">
               <li>等待结果生成</li>
@@ -305,8 +265,7 @@
 
           <div class="anatomy-block">
             <div class="anatomy-block-heading">
-              <strong>Color Recipe</strong>
-              <span id="recipe-stack-caption">可复用处方</span>
+              <strong>调色处方</strong>
             </div>
             <div id="color-recipe-stack" class="color-recipe-stack">
               <p class="candidate-empty">调色步骤会显示在这里</p>
@@ -316,21 +275,19 @@
       </aside>
     </main>
     <footer class="app-footer">
-      <div class="footer-status"><i aria-hidden="true"></i><span id="status-text">就绪</span></div>
-      <span class="footer-feedback">COLOR MUSE / EXPLAINABLE COLOR SYSTEM</span>
       <div class="footer-actions">
         <div class="download-dropdown" id="download-dropdown">
-          <button id="btn-download" class="btn-primary" disabled>导出结果 <span>↓</span></button>
+          <button id="btn-download" class="btn-primary" disabled>导出 <span>↓</span></button>
           <div class="download-menu" id="download-menu">
             <div class="download-menu-section">
               <div class="download-menu-label">图片导出</div>
               <button class="download-menu-item" data-action="download-jpg">
                 <span class="download-menu-icon"> JPG</span>
-                <span>下载 JPEG 图片</span>
+                <span>JPEG</span>
               </button>
               <button class="download-menu-item" data-action="download-png">
                 <span class="download-menu-icon"> PNG</span>
-                <span>下载 PNG 图片</span>
+                <span>PNG</span>
               </button>
             </div>
             <div class="download-menu-divider"></div>
@@ -338,11 +295,11 @@
               <div class="download-menu-label">LUT 导出</div>
               <button class="download-menu-item" data-action="download-cube" data-requires-lut disabled>
                 <span class="download-menu-icon">LUT</span>
-                <span>下载 .CUBE LUT</span>
+                <span>.CUBE LUT</span>
               </button>
               <button class="download-menu-item" data-action="download-lr" data-requires-lut disabled>
                 <span class="download-menu-icon">XMP</span>
-                <span>导出近似 Lightroom 预设</span>
+                <span>Lightroom 预设</span>
               </button>
             </div>
             <div class="download-menu-divider"></div>
@@ -350,16 +307,16 @@
               <div class="download-menu-label">审色记录</div>
               <button class="download-menu-item" data-action="download-recipe">
                 <span class="download-menu-icon">DNA</span>
-                <span>下载 Color Recipe</span>
+                <span>Color Recipe</span>
               </button>
               <button class="download-menu-item" data-action="download-report">
                 <span class="download-menu-icon">JSON</span>
-                <span>下载审色报告</span>
+                <span>审色报告</span>
               </button>
             </div>
           </div>
         </div>
-        <button id="btn-batch" class="btn-secondary" disabled>批量处理</button>
+        <button id="btn-batch" class="btn-secondary" disabled>批量</button>
       </div>
     </footer>
   </div>

@@ -152,7 +152,7 @@ function resetAnatomy() {
   const live = getElement('color-anatomy-live');
   if (live) live.textContent = '等待画面';
   const summary = getElement('color-anatomy-summary');
-  if (summary) summary.textContent = '完成智能审色后，这里会解释颜色发生了什么变化。';
+  if (summary) summary.textContent = '等待结果';
   clearCanvas(getElement('color-component-map'));
   clearCanvas(getElement('color-scope-canvas'), '#151817');
   clearMainOverlay();
@@ -190,9 +190,9 @@ function handleAnalysisState(payload) {
   if (summary) {
     summary.textContent = comparison
       ? referenceRecipe
-        ? `Reference Recipe V2 用 ${referenceRecipe.layers.filter(layer => layer.enabled).length} 个真实参数层，将参考贴合从 ${Math.round(comparison.sourceFit * 100)} 提升到 ${Math.round(comparison.resultFit * 100)}。`
+        ? `${referenceRecipe.layers.filter(layer => layer.enabled).length} 个参数层 · 参考贴合 ${Math.round(comparison.sourceFit * 100)} → ${Math.round(comparison.resultFit * 100)}`
         : comparison.explanations[comparison.explanations.length - 1]
-      : '原图与参考图已经建立 Color DNA，等待结果生成。';
+      : 'Color DNA 已建立 · 等待结果';
   }
   if (images.result && !autoOpened) {
     autoOpened = true;
@@ -749,8 +749,8 @@ function renderReferenceRecipePanel() {
     ? `${referenceRecipe.layers.filter(layer => layer.enabled).length}/${referenceRecipe.layers.length} 层启用`
     : '0 层';
   if (status) status.textContent = referenceRecipe
-    ? `当前显示的是实际参与「参考还原」渲染的参数；全局强度 ${Math.round(referenceRecipe.intensity * 100)}%。`
-    : '切换到「参考还原」方案后显示真实可渲染处方。';
+    ? `${referenceRecipe.layers.filter(layer => layer.enabled).length}/${referenceRecipe.layers.length} 层 · 强度 ${Math.round(referenceRecipe.intensity * 100)}%`
+    : '选择“参考还原”后显示';
   renderRecipeToneCurve();
   renderPointColorControls();
 }

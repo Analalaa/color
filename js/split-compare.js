@@ -70,7 +70,7 @@ function resetSplit() {
 
 function updateToggleLabel() {
   const label = document.getElementById('toggle-label');
-  if (label) label.textContent = isActive ? '关闭对照' : '分屏对照';
+  if (label) label.textContent = isActive ? '关闭' : '对照';
 }
 
 function showSplit() {
