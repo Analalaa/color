@@ -190,8 +190,24 @@ function downloadAnalysisReport() {
 
 function downloadColorRecipe() {
   const anatomy = getColorAnatomyReport();
-  if (!anatomy?.comparison?.recipe?.length) {
+  if (!anatomy?.referenceRecipe && !anatomy?.comparison?.recipe?.length) {
     showToast('当前还没有可导出的 Color Recipe');
+    return;
+  }
+  if (anatomy.referenceRecipe) {
+    const recipe = {
+      ...anatomy.referenceRecipe,
+      generatedAt: new Date().toISOString(),
+      sourceName: getCurrentImageName(),
+      selectedEngineId: getSelectedEngineId(),
+      referenceFitGain: anatomy.comparison.referenceFitGain,
+      fitTrace: anatomy.recipeTrace,
+      referenceDNA: anatomy.reference,
+      resultDNA: anatomy.result
+    };
+    const blob = new Blob([JSON.stringify(recipe, null, 2)], { type: 'application/json' });
+    triggerDownload(blob, `${safeBaseName(getCurrentImageName())}_reference-recipe-v2.json`);
+    showToast('已下载可重新渲染的 Reference Recipe V2');
     return;
   }
   const recipe = {

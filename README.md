@@ -10,7 +10,10 @@ Color Muse 是一个纯浏览器端运行的参考图审色工具。它不会要
 - 检查 Lab 分布贴合、局部层次、明暗余量、中性色漂移和过饱和风险
 - 输出推荐方案、建议强度、四维分数、置信度和审色依据
 - Color Anatomy 色彩解剖：L* / C* / H° / RGB 分量图、六色切片定位与原图/参考/结果三态 Scopes
-- 将明暗结构、彩度密度、主色色相和中性色平衡拆成可解释 Color Recipe，并支持 JSON 导出
+- 高精度 Scopes：192×128 对数密度 Waveform、亮度/RGB/10–90% 包络模式、0–100 IRE 标尺、三态独立显隐、Lab 密度 Vectorscope 与真实空间 RGB Parade
+- Reference Recipe Engine V2：将参考还原真实拆成白平衡、单调色调曲线、动态 Point Color、三段式色轮和保护区域
+- 曲线叠加原图/参考/结果明度分布；Point Color 支持 Visualize Range，实际参数层支持单独开关和 Fit 增益解释
+- 支持导出可重新渲染的 Reference Recipe V2 JSON；其他方案仍提供结果反推 Color Recipe
 - Web Worker 并行生成轻量候选，仅对采用方案做全尺寸渲染
 - 支持分屏对照、JPEG/PNG、CUBE LUT、近似 Lightroom XMP、审色报告 JSON，以及带进度与取消能力的 Worker 批处理
 - 原图与参考图均保留在本地浏览器，不上传服务器
@@ -56,6 +59,7 @@ js/
 ├── ui/candidate-board.js         # 推荐摘要和候选解释界面
 ├── ui/color-anatomy.js           # 色彩解剖、Scopes 和 Recipe 界面
 ├── color-transfer/               # 色彩迁移与 LUT 实现
+│   └── reference-recipe-engine.js # 可拆解参考处方的求解与渲染
 ├── preview.js                    # 审色会话与采用状态
 └── download.js                   # 图片、LUT、XMP、报告与批处理
 ```
@@ -70,11 +74,11 @@ for file in $(rg --files js -g '*.js'); do
 done
 ```
 
-测试覆盖引擎统一接口、零强度恒等输出、参考增益、局部层次损失、曝光与中性色风险、场景画像、强度风险门控、候选排序、推荐置信度、Color DNA、分量图、颜色切片和 Scopes 数据。
+测试覆盖引擎统一接口、零强度恒等输出、参考增益、局部层次损失、曝光与中性色风险、场景画像、强度风险门控、候选排序、推荐置信度、Color DNA、分量图、颜色切片、Scopes，以及 Reference Recipe 曲线单调性、参数开关和范围蒙版。
 
 ## 输出说明
 
-- `参考还原`是像素级结果，不提供可复用 LUT。
+- `参考还原`由 Reference Recipe V2 参数栈渲染，可导出完整 JSON 处方，但不提供 3D LUT。
 - `平衡电影感`与`自然色彩关系`可导出 CUBE LUT。
 - Lightroom XMP 是从 3D LUT 采样得到的近似参数，不能保证与 CUBE 在所有照片上完全一致。
 - 审色报告 JSON 不包含原图像素，只记录场景画像、候选分数、风险、推荐和最终采用参数。

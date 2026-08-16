@@ -68,7 +68,8 @@ function runSynchronously({
   intensities,
   includeLut,
   calculateMetrics,
-  sceneProfile
+  sceneProfile,
+  recipeOptions
 }) {
   return new Promise(resolve => {
     setTimeout(() => {
@@ -96,17 +97,19 @@ function runSynchronously({
           return;
         }
 
-        const { resultPixels, lut } = runEngine({
+        const { resultPixels, lut, recipe } = runEngine({
           engineId,
           sourcePixels: source.data,
           referencePixels: reference.data,
           intensity,
-          includeLut
+          includeLut,
+          recipeOptions
         });
         resolve({
           engineId,
           resultPixels,
           lut,
+          recipe,
           assessment: calculateMetrics
             ? assessQuality(source.data, resultPixels, reference.data, {
               width: source.width,
@@ -131,6 +134,7 @@ function runWorkerJob({
   includeLut,
   calculateMetrics,
   sceneProfile,
+  recipeOptions,
   timeoutMs = 20000,
   pool
 }) {
@@ -143,7 +147,8 @@ function runWorkerJob({
       intensities,
       includeLut,
       calculateMetrics,
-      sceneProfile
+      sceneProfile,
+      recipeOptions
     });
   }
 
@@ -160,7 +165,8 @@ function runWorkerJob({
         intensities,
         includeLut,
         calculateMetrics,
-        sceneProfile
+        sceneProfile,
+        recipeOptions
       }));
       return;
     }
@@ -199,6 +205,7 @@ function runWorkerJob({
         engineId,
         resultPixels: message.resultBuffer ? new Uint8ClampedArray(message.resultBuffer) : null,
         lut: message.lutBuffer ? new Float64Array(message.lutBuffer) : null,
+        recipe: message.recipe || null,
         assessment: message.assessment,
         variants: message.variants?.map(variant => ({
           intensity: variant.intensity,
@@ -221,7 +228,8 @@ function runWorkerJob({
       intensities,
       includeLut,
       calculateMetrics,
-      sceneProfile
+      sceneProfile,
+      recipeOptions
     }, [sourceCopy.buffer, referenceCopy.buffer]);
   });
 }
@@ -314,7 +322,7 @@ export async function generateCandidates({
   };
 }
 
-export async function renderFullCandidate({ engineId, source, reference, intensity = 1 }) {
+export async function renderFullCandidate({ engineId, source, reference, intensity = 1, recipeOptions = null }) {
   cancelFullRender();
   const renderPool = [];
   const resultPromise = runWorkerJob({
@@ -324,6 +332,7 @@ export async function renderFullCandidate({ engineId, source, reference, intensi
     intensity,
     includeLut: true,
     calculateMetrics: false,
+    recipeOptions,
     timeoutMs: 90000,
     pool: renderPool
   });

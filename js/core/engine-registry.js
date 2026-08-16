@@ -1,14 +1,15 @@
-import { transferColor } from '../color-transfer/histogram-transfer.js';
 import { generateLut } from '../color-transfer/lut-generator.js';
 import { applyLut } from '../color-transfer/lut-applier.js';
 import { generateNeuralPresetLut } from '../color-transfer/neural-preset-transfer.js';
+import { renderReferenceRecipe } from '../color-transfer/reference-recipe-engine.js';
 
 export const ENGINE_DEFINITIONS = Object.freeze([
   Object.freeze({
     id: 'histogram',
     label: '参考还原',
-    detail: '优先贴近参考图的整体色彩分布',
-    exportable: false
+    detail: '用可拆解曲线、Point Color 与分区色轮贴近参考',
+    exportable: false,
+    recipeCapable: true
   }),
   Object.freeze({
     id: 'lut',
@@ -66,7 +67,8 @@ export function runEngine({
   sourcePixels,
   referencePixels,
   intensity = 1,
-  includeLut = true
+  includeLut = true,
+  recipeOptions = null
 }) {
   if (!getEngineDefinition(engineId)) {
     throw new Error(`未知仿色方案: ${engineId}`);
@@ -76,18 +78,18 @@ export function runEngine({
   }
 
   const safeIntensity = Math.max(0, Math.min(1, Number(intensity) || 0));
+  if (engineId === 'histogram') {
+    const result = renderReferenceRecipe(sourcePixels, referencePixels, {
+      intensity: safeIntensity,
+      disabledLayerIds: recipeOptions?.disabledLayerIds || []
+    });
+    return { ...result, lut: null };
+  }
   if (safeIntensity === 0) {
     const engine = getEngineDefinition(engineId);
     return {
       resultPixels: new Uint8ClampedArray(sourcePixels),
       lut: includeLut && engine.exportable ? createIdentityLut() : null
-    };
-  }
-
-  if (engineId === 'histogram') {
-    return {
-      resultPixels: transferColor(sourcePixels, referencePixels, safeIntensity),
-      lut: null
     };
   }
 

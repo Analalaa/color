@@ -12,6 +12,8 @@ import {
 let currentResultPixels = null;
 let currentResultDimensions = { width: 0, height: 0 };
 let currentLut = null;
+let currentReferenceRecipe = null;
+let recipeDisabledLayerIds = [];
 let selectedEngineId = null;
 let lastIntensity = 1;
 let lastRefData = null;
@@ -34,6 +36,8 @@ export function initPreview() {
     candidateSet = [];
     analysisReport = null;
     selectedEngineId = null;
+    currentReferenceRecipe = null;
+    recipeDisabledLayerIds = [];
     invalidateResult();
     emitInputState();
     updateStatus('正在读取参考图…');
@@ -42,6 +46,12 @@ export function initPreview() {
   EventBus.on('candidate-generation-requested', () => generateCandidateSet({ preserveSelection: true }));
   EventBus.on('candidate-selection-requested', ({ engineId }) => {
     applyCandidate(engineId, { showPreview: true, useSuggestedIntensity: true });
+  });
+  EventBus.on('reference-recipe-options-changed', ({ disabledLayerIds = [] } = {}) => {
+    recipeDisabledLayerIds = [...new Set(disabledLayerIds.filter(Boolean))];
+    if (selectedEngineId === 'histogram' && lastRefData && sourceReady) {
+      applyCandidate(selectedEngineId, { showPreview: false, useSuggestedIntensity: false });
+    }
   });
 
   EventBus.on('intensity-changed', intensity => {
@@ -65,6 +75,8 @@ export function initPreview() {
     candidateSet = [];
     analysisReport = null;
     selectedEngineId = null;
+    currentReferenceRecipe = null;
+    recipeDisabledLayerIds = [];
     invalidateResult();
     emitInputState();
     scheduleAutomaticGeneration();
@@ -89,6 +101,8 @@ async function handleReferenceSelected({ id, refData }) {
   candidateSet = [];
   analysisReport = null;
   selectedEngineId = null;
+  currentReferenceRecipe = null;
+  recipeDisabledLayerIds = [];
   invalidateResult();
 
   const intensitySlider = document.getElementById('intensity-slider');
@@ -98,7 +112,7 @@ async function handleReferenceSelected({ id, refData }) {
   emitColorAnalysisState(getSourcePixels());
 }
 
-function emitColorAnalysisState(source, result = null) {
+function emitColorAnalysisState(source, result = null, referenceRecipe = currentReferenceRecipe) {
   if (!source?.data?.length || !lastRefData?.data?.length) return;
   try {
     const maxSide = 520;
@@ -107,7 +121,8 @@ function emitColorAnalysisState(source, result = null) {
       reference: resizePixelData(lastRefData, maxSide),
       result: result?.data?.length ? resizePixelData(result, maxSide) : null,
       engineId: selectedEngineId,
-      intensity: lastIntensity
+      intensity: lastIntensity,
+      referenceRecipe: selectedEngineId === 'histogram' ? referenceRecipe : null
     });
   } catch (error) {
     console.warn('[preview] Color Anatomy analysis skipped:', error);
@@ -193,6 +208,7 @@ async function applyCandidate(engineId, {
   }
   selectedEngineId = engineId;
   currentLut = null;
+  currentReferenceRecipe = null;
   currentResultPixels = null;
   currentResultDimensions = { width: 0, height: 0 };
   isShowingResult = false;
@@ -218,13 +234,17 @@ async function applyCandidate(engineId, {
       engineId,
       source,
       reference: lastRefData,
-      intensity: lastIntensity
+      intensity: lastIntensity,
+      recipeOptions: engineId === 'histogram'
+        ? { disabledLayerIds: recipeDisabledLayerIds }
+        : null
     });
     if (requestId !== renderRequest || engineId !== selectedEngineId) return;
 
     currentResultPixels = result.resultPixels;
     currentResultDimensions = { width: source.width, height: source.height };
     currentLut = result.lut;
+    currentReferenceRecipe = result.recipe || null;
     setPixels(currentResultPixels, source.width, source.height);
     isShowingResult = true;
     hideSpinner();
@@ -241,13 +261,14 @@ async function applyCandidate(engineId, {
       height: source.height,
       engineId,
       hasOriginal: !!originalPixels,
-      originalPixels
+      originalPixels,
+      referenceRecipe: currentReferenceRecipe
     });
     emitColorAnalysisState(source, {
       data: currentResultPixels,
       width: source.width,
       height: source.height
-    });
+    }, currentReferenceRecipe);
   } catch (error) {
     if (requestId !== renderRequest) return;
     console.error('[preview] Full-resolution render failed:', error);
@@ -265,6 +286,7 @@ function invalidateResult() {
   currentResultPixels = null;
   currentResultDimensions = { width: 0, height: 0 };
   currentLut = null;
+  currentReferenceRecipe = null;
   isShowingResult = false;
   hideSpinner();
   EventBus.emit('result-invalidated');
@@ -375,6 +397,10 @@ export function downloadCurrentLut() {
 
 export function getCurrentLut() {
   return currentLut;
+}
+
+export function getCurrentReferenceRecipe() {
+  return currentReferenceRecipe;
 }
 
 export function getAnalysisReport() {
