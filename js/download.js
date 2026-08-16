@@ -207,7 +207,7 @@ function downloadColorRecipe() {
     };
     const blob = new Blob([JSON.stringify(recipe, null, 2)], { type: 'application/json' });
     triggerDownload(blob, `${safeBaseName(getCurrentImageName())}_reference-recipe-v2.json`);
-    showToast('已下载可重新渲染的 Reference Recipe V2');
+    showToast('Color Recipe 已下载');
     return;
   }
   const recipe = {
@@ -560,7 +560,7 @@ async function handleBatchStart({ images }) {
   const batchSize = images.length;
   const engineId = getSelectedEngineId() || 'lut';
   const batchButton = document.getElementById('btn-batch');
-  if (batchButton) batchButton.textContent = '取消批处理';
+  if (batchButton) batchButton.textContent = '取消';
 
   let failures = 0;
   let processed = 0;
@@ -598,7 +598,7 @@ async function handleBatchStart({ images }) {
     batchCancelRequested = false;
     if (batchButton) {
       batchButton.disabled = false;
-      batchButton.textContent = '批量处理';
+      batchButton.textContent = '批量';
     }
   }
 }

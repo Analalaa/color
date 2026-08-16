@@ -4517,3 +4517,226 @@ input:focus-visible {
   background: var(--coral);
   box-shadow: 0 0 0 3px rgba(189, 112, 72, 0.1);
 }
+
+/* Quiet workspace — information appears only when it helps the next action. */
+
+.app-header {
+  grid-template-columns: 1fr auto;
+  gap: 18px;
+  height: 62px;
+  padding: 8px 18px;
+}
+
+.brand-lockup {
+  display: block;
+}
+
+.app-header .brand-lockup h1 {
+  font-size: clamp(28px, 2.5vw, 37px);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+#reopen-intro-btn {
+  margin: 0;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 8px;
+}
+
+#reopen-intro-btn:hover {
+  background: var(--accent-light);
+}
+
+.app-desc {
+  grid-template-columns: 1fr auto;
+  min-height: 42px;
+  padding: 0 18px;
+}
+
+.workflow-index {
+  width: fit-content;
+}
+
+.workflow-index button {
+  min-width: 78px;
+  justify-content: center;
+  padding: 0 15px;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: .02em;
+}
+
+.focus-mode-btn {
+  padding-left: 11px;
+}
+
+.toolbar-left {
+  gap: 22px;
+}
+
+.rail-heading {
+  padding-bottom: 11px;
+}
+
+.rail-heading strong {
+  font: 500 18px/1 var(--font-ui);
+  letter-spacing: -.02em;
+}
+
+.toolbar-top {
+  gap: 22px;
+}
+
+.toolbar-label {
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: .02em;
+  text-transform: none;
+}
+
+.btn-text {
+  font-family: var(--font-ui);
+  letter-spacing: 0;
+}
+
+.drop-zone-content {
+  gap: 10px;
+}
+
+.drop-zone-content p {
+  font-size: clamp(25px, 2.6vw, 36px);
+}
+
+.drop-hint {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: .03em;
+}
+
+.processing-copy strong {
+  font-size: 12px;
+}
+
+.transport-heading span,
+.canvas-transport .slider-labels {
+  font-family: var(--font-ui);
+  letter-spacing: .02em;
+}
+
+.panel-right {
+  padding-top: 16px;
+}
+
+.reference-drawer summary {
+  min-height: 38px;
+}
+
+.reference-drawer summary span {
+  font-size: 11px;
+}
+
+.reference-drawer summary::after {
+  color: var(--text-hint);
+  content: "+";
+  font: 500 14px var(--font-ui);
+}
+
+.reference-drawer[open] summary::after {
+  content: "−";
+}
+
+.panel-mode-tabs {
+  margin-bottom: 12px;
+}
+
+.panel-mode-tab {
+  min-height: 35px;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.candidate-section-heading {
+  justify-content: flex-end;
+  min-height: 18px;
+}
+
+.candidate-refresh {
+  font-family: var(--font-ui);
+  font-size: 10px;
+}
+
+.candidate-status {
+  margin: -13px 45px 11px 0;
+  font-size: 9px;
+}
+
+.candidate-status.hidden {
+  display: none;
+}
+
+.candidate-recommendation::before {
+  display: none;
+}
+
+.candidate-actions {
+  justify-content: flex-end;
+}
+
+.candidate-evidence summary {
+  font-family: var(--font-ui);
+}
+
+.color-anatomy-heading h3 {
+  margin: 0;
+  font: 500 18px/1.1 var(--font-ui);
+  letter-spacing: -.02em;
+}
+
+.color-anatomy-summary {
+  font-size: 9px;
+}
+
+.recipe-v2-title {
+  gap: 0;
+}
+
+.app-footer {
+  justify-content: flex-end;
+  height: 44px;
+  padding: 0 14px;
+}
+
+.footer-actions {
+  margin-left: 0;
+}
+
+@media (max-width: 920px) {
+  .app-header {
+    grid-template-columns: 1fr auto;
+    height: 62px;
+  }
+
+  .app-desc {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .workflow-index button {
+    min-width: 0;
+  }
+
+  .header-actions {
+    display: flex;
+  }
+
+  #reopen-intro-btn {
+    display: block;
+  }
+}

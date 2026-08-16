@@ -51,7 +51,7 @@ export function initEditorialShell(EventBus) {
   const setFocusMode = enabled => {
     app.classList.toggle('focus-mode', enabled);
     focusButton?.setAttribute('aria-pressed', String(enabled));
-    if (focusLabel) focusLabel.textContent = enabled ? '退出专注' : '专注画面';
+    if (focusLabel) focusLabel.textContent = enabled ? '返回' : '画面';
   };
 
   focusButton?.addEventListener('click', () => {
