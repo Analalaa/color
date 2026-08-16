@@ -6,6 +6,7 @@ import { initPreview } from './preview.js';
 import { initDownload } from './download.js';
 import { initSplitCompare } from './split-compare.js';
 import { initCandidateBoard } from './ui/candidate-board.js';
+import { initColorAnatomy } from './ui/color-anatomy.js';
 import { showToast } from './toast.js';
 
 class EventBusImpl {
@@ -59,6 +60,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     initCanvasWorkspace();
     await initReferenceLibrary();
     initCandidateBoard();
+    initColorAnatomy();
     initPreview();
     initDownload();
     initSplitCompare();

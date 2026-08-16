@@ -115,12 +115,17 @@
           </div>
         </div>
         <canvas id="split-overlay-canvas"></canvas>
+        <canvas id="anatomy-overlay-canvas" aria-hidden="true"></canvas>
         <div id="processing-spinner" class="processing-spinner hidden">
           <div class="spinner-ring"></div>
         </div>
       </section>
       <aside class="panel-right">
-        <section class="candidate-section">
+        <div class="panel-mode-tabs" role="tablist" aria-label="右侧分析面板">
+          <button class="panel-mode-tab active" type="button" role="tab" aria-selected="true" data-panel-mode="candidates">智能方案</button>
+          <button class="panel-mode-tab" type="button" role="tab" aria-selected="false" data-panel-mode="anatomy">色彩解剖 <span>NEW</span></button>
+        </div>
+        <section id="candidate-panel" class="candidate-section panel-mode-content">
           <div class="candidate-section-heading">
             <h3 class="section-title">智能方案</h3>
             <button id="regenerate-candidates-btn" class="candidate-refresh" type="button" disabled>重新比较</button>
@@ -136,6 +141,91 @@
           </div>
           <div id="candidate-board" class="candidate-board">
             <p class="candidate-empty">三种候选会显示在这里</p>
+          </div>
+        </section>
+        <section id="color-anatomy-panel" class="color-anatomy panel-mode-content hidden" aria-live="polite">
+          <div class="color-anatomy-heading">
+            <div>
+              <span class="color-anatomy-kicker">COLOR ANATOMY</span>
+              <h3>Color DNA 色彩解剖</h3>
+            </div>
+            <span id="color-anatomy-live" class="color-anatomy-live">等待画面</span>
+          </div>
+          <p id="color-anatomy-summary" class="color-anatomy-summary">完成智能审色后，这里会解释颜色发生了什么变化。</p>
+
+          <div class="anatomy-source-tabs" role="tablist" aria-label="分析对象">
+            <button type="button" data-anatomy-source="source">原图</button>
+            <button type="button" data-anatomy-source="reference">参考</button>
+            <button type="button" class="active" data-anatomy-source="result">结果</button>
+          </div>
+
+          <div class="anatomy-metrics">
+            <div><span>参考贴合</span><strong id="anatomy-fit-score">—</strong></div>
+            <div><span>中位明度</span><strong id="anatomy-lightness">—</strong></div>
+            <div><span>平均彩度</span><strong id="anatomy-chroma">—</strong></div>
+            <div><span>中性色偏移</span><strong id="anatomy-neutral">—</strong></div>
+          </div>
+
+          <div class="anatomy-block">
+            <div class="anatomy-block-heading">
+              <strong>分量图</strong>
+              <span id="component-map-caption">明度 L*</span>
+            </div>
+            <div class="component-tabs" role="tablist" aria-label="颜色分量">
+              <button type="button" class="active" data-component-mode="lightness">L*</button>
+              <button type="button" data-component-mode="chroma">C*</button>
+              <button type="button" data-component-mode="hue">H°</button>
+              <button type="button" data-component-mode="red">R</button>
+              <button type="button" data-component-mode="green">G</button>
+              <button type="button" data-component-mode="blue">B</button>
+            </div>
+            <canvas id="color-component-map" width="296" height="148" aria-label="颜色分量图"></canvas>
+            <p id="component-map-help" class="anatomy-help">越亮代表该位置的感知明度越高。</p>
+          </div>
+
+          <div class="anatomy-block">
+            <div class="anatomy-block-heading">
+              <strong>颜色切片</strong>
+              <span>点击定位像素</span>
+            </div>
+            <div id="color-slice-controls" class="color-slice-controls"></div>
+            <p id="color-slice-explanation" class="anatomy-help">选择一个颜色切片，查看它在画面中的位置与变化。</p>
+          </div>
+
+          <div class="anatomy-block anatomy-scope-block">
+            <div class="anatomy-block-heading">
+              <strong>三态 Scopes</strong>
+              <span>原图 · 参考 · 结果</span>
+            </div>
+            <div class="scope-tabs" role="tablist" aria-label="示波器类型">
+              <button type="button" class="active" data-scope-mode="waveform">Waveform</button>
+              <button type="button" data-scope-mode="vectorscope">Vectorscope</button>
+              <button type="button" data-scope-mode="parade">RGB Parade</button>
+            </div>
+            <canvas id="color-scope-canvas" width="296" height="156" aria-label="色彩示波器"></canvas>
+            <div class="scope-legend" aria-hidden="true">
+              <span class="source">原图</span><span class="reference">参考</span><span class="result">结果</span>
+            </div>
+          </div>
+
+          <div class="anatomy-block">
+            <div class="anatomy-block-heading">
+              <strong>Agent 解释</strong>
+              <span id="anatomy-engine-label">实时</span>
+            </div>
+            <ul id="color-explanation-list" class="color-explanation-list">
+              <li>等待结果生成</li>
+            </ul>
+          </div>
+
+          <div class="anatomy-block">
+            <div class="anatomy-block-heading">
+              <strong>Color Recipe</strong>
+              <span>可复用处方</span>
+            </div>
+            <div id="color-recipe-stack" class="color-recipe-stack">
+              <p class="candidate-empty">调色步骤会显示在这里</p>
+            </div>
           </div>
         </section>
         <div class="panel-divider"></div>
@@ -179,6 +269,10 @@
             <div class="download-menu-divider"></div>
             <div class="download-menu-section">
               <div class="download-menu-label">审色记录</div>
+              <button class="download-menu-item" data-action="download-recipe">
+                <span class="download-menu-icon">DNA</span>
+                <span>下载 Color Recipe</span>
+              </button>
               <button class="download-menu-item" data-action="download-report">
                 <span class="download-menu-icon">JSON</span>
                 <span>下载审色报告</span>
